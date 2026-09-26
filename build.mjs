@@ -14,11 +14,17 @@ const fontCss = `@font-face{font-family:'Geist';font-style:normal;font-weight:10
 
 fs.mkdirSync(dist, { recursive: true });
 
-for (const name of ['morph.template.html', 'library.template.html']) {
+const jobs = [
+  ['morph.template.html', path.join(dist, 'morph.html')],
+  ['library.template.html', path.join(dist, 'library.html')],
+  ['component.template.html', path.join(dist, 'component.html')],
+  ['docs.template.html', path.join(root, 'index.html')],
+];
+
+for (const [name, out] of jobs) {
   let html = fs.readFileSync(path.join(src, name), 'utf8');
   html = html.replace('/*__FONT__*/', fontCss).replace('/*__ENGINE__*/', engine);
   if (html.includes('__FONT__') || html.includes('__ENGINE__')) throw new Error('placeholder left in ' + name);
-  const out = path.join(dist, name.replace('.template', ''));
   fs.writeFileSync(out, html);
   console.log(out, (html.length / 1024).toFixed(1) + ' KB');
 }

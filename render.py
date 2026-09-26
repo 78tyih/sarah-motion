@@ -26,12 +26,36 @@ window.__stop();
 """
 
 
-def open_page(p):
+COMPONENT_URL = 'file://' + os.path.join(ROOT, 'dist', 'component.html')
+
+CATALOG_BEATS = [
+    ('button', 0, 4), ('loader', 4, 8), ('check', 8, 12), ('player', 12, 16),
+    ('progress', 16, 20), ('slider', 20, 24), ('toggle', 24, 28), ('tabs', 28, 32),
+    ('chart', 32, 35.5), ('palette', 35.5, 38), ('notify', 38, 38.75),
+]
+
+COMPONENTS = [
+    ('button',   'Button',          '按下 → 释放，弹簧回弹带轻微超调'),
+    ('loader',   'Loader',          '收成圆，弧扫三圈后闭合成环'),
+    ('check',    'Checkmark',       '笔画自绘；强调色第一次出现'),
+    ('player',   'Music player',    '展开成卡片，播放与暂停反向旋转交替'),
+    ('progress', 'Progress',        '抓住播放头拖动，松手从当前位置弹回'),
+    ('slider',   'Volume slider',   '拖过最大值：元素拉伸 6%，旋钮压扁'),
+    ('toggle',   'Switch',          '旋钮前后缘各骑一个弹簧，翻转中途被拉长'),
+    ('tabs',     'Liquid tabs',     '指示器前缘先到，拖着后缘走'),
+    ('chart',    'Chart',           '折线自绘 1.25 拍，悬停升起 tooltip'),
+    ('palette',  'Command palette', '三次输入实时过滤，回车选中首行'),
+    ('notify',   'Notification',    '一闪而过的 toast，随即变回按钮闭合循环'),
+]
+
+
+def open_page(p, url=URL, freeze=True):
     b = p.chromium.launch()
     pg = b.new_page(viewport={'width': 1440, 'height': 1440}, device_scale_factor=1)
-    pg.goto(URL)
+    pg.goto(url)
     pg.wait_for_function('window.MORPH_READY === true', timeout=60000)
-    pg.evaluate(FREEZE)
+    if freeze:
+        pg.evaluate(FREEZE)
     return b, pg
 
 
@@ -107,6 +131,47 @@ def video():
         print(err[-3000:])
 
 
+def components():
+    os.makedirs(os.path.join(ROOT, 'media'), exist_ok=True)
+    with sync_playwright() as p:
+        b, pg = open_page(p, COMPONENT_URL, freeze=False)
+        for key, name, desc in COMPONENTS:
+            cat = next(c for c in CATALOG_BEATS if c[0] == key)
+            s0, s1 = cat[1] + 0.50, cat[2] - 0.05
+            span = (s1 - s0) * BEAT
+            half = max(1.2, span)
+            total = 2 * half
+            nframes = int(round(total * FPS))
+            out = os.path.join(ROOT, 'media', key + '.mp4')
+            cmd = ['ffmpeg', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', '1440x1440',
+                   '-framerate', str(FPS * SUB), '-i', '-',
+                   '-vf', "tmix=frames=%d,select='not(mod(n+1,%d))',setpts=N/%d/TB" % (SUB, SUB, FPS),
+                   '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p',
+                   '-r', str(FPS), '-movflags', '+faststart', out]
+            proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            label = '%s · %s' % (name, {'button': '按钮', 'loader': '加载器', 'check': '勾选',
+                                        'player': '播放器', 'progress': '进度条', 'slider': '音量滑块',
+                                        'toggle': '开关', 'tabs': '液体标签', 'chart': '图表',
+                                        'palette': '命令面板', 'notify': '通知'}[key])
+            pg.evaluate('window.__setLabel(%r, %r)' % (label, desc))
+            for i in range(nframes):
+                for k in range(SUB):
+                    tt = (i + k / SUB) / FPS
+                    u = tt / total
+                    ptri = 2 * u if u < 0.5 else 2 * (1 - u)
+                    t = (s0 + (s1 - s0) * ptri) * BEAT
+                    pg.evaluate('window.__seek(%r)' % float(t))
+                    im = Image.open(io.BytesIO(pg.locator('#stage').screenshot())).convert('RGB')
+                    proc.stdin.write(im.tobytes())
+            proc.stdin.close()
+            err = proc.stderr.read().decode()
+            rc = proc.wait()
+            print(key, 'rc', rc, os.path.getsize(out) // 1024, 'KB', flush=True)
+            if rc != 0:
+                print(err[-1500:])
+        b.close()
+
+
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 else 'sheet'
     if mode == 'sheet':
@@ -115,3 +180,5 @@ if __name__ == '__main__':
         one(float(sys.argv[2]))
     elif mode == 'video':
         video()
+    elif mode == 'components':
+        components()

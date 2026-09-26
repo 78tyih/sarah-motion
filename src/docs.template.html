@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Sarah · 动效组件库</title>
+<style>
+/*__FONT__*/
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#F2F0ED;font-family:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:48px 28px 80px}
+header{padding-bottom:26px;border-bottom:1px solid rgba(10,10,10,0.10);margin-bottom:8px}
+h1{font-size:22px;font-weight:500;letter-spacing:-0.02em}
+.sub{font-size:14px;color:#8A857E;margin-top:8px;line-height:1.6;max-width:760px}
+.rule{font-size:13px;color:#6E6A63;margin-top:14px;line-height:1.9}
+.rule b{font-weight:500;color:#0A0A0A}
+.row{display:grid;grid-template-columns:400px 1fr;gap:32px;align-items:center;padding:28px 0;border-bottom:1px solid rgba(10,10,10,0.08)}
+@media (max-width:860px){.row{grid-template-columns:1fr;gap:18px}}
+video{width:400px;height:400px;max-width:100%;border-radius:12px;background:#E9E6E0;display:block}
+.nm{font-size:17px;font-weight:500;letter-spacing:-0.015em}
+.cn{font-size:13px;color:#8A857E;margin-left:8px;font-weight:400}
+.desc{font-size:14px;color:#3D3A35;line-height:1.6;margin-top:8px;max-width:560px}
+.spec{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-size:12px;color:#6E6A63;border:1px solid rgba(10,10,10,0.12);border-radius:7px;padding:3px 9px;font-variant-numeric:tabular-nums}
+footer{margin-top:40px;font-size:12px;color:#8A857E;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sarah · 动效组件库</h1>
+    <div class="sub">每个组件一段循环视频，配一句话说明。所有动作都是时间的纯函数：无 CSS 过渡、无定时器，弹簧用闭式阶跃响应叠加。</div>
+    <div class="rule">
+      <b>怎么读这些视频</b><br>
+      一个元素永不切割，只改尺寸、圆角、颜色；内容在短暂模糊中切换。<br>
+      光标驱动每一次变化 —— 按住时值由光标位置直接算出，松手从实际位置弹回。<br>
+      领先边缘与尾随边缘骑不同弹簧，所以标签指示器和开关旋钮会在行程中被拉长。<br>
+      120 BPM，1 拍 = 0.5s，重拍对小节线。
+    </div>
+  </header>
+  <div id="list"></div>
+  <footer>
+    弹簧 ω 13–17 rad/s，ζ 0.60–0.72，最多轻微超调 · 画布 #F2F0ED · 墨 #0A0A0A · 强调 #4F8CFF · 涨 #30A46C / 跌 #E5484D · 字体 Geist<br>
+    视频 1440×1440 / 60fps / 4 子帧混合动态模糊。文字说明只留一句，细节看源码。
+  </footer>
+</div>
+<script>
+/*__ENGINE__*/
+(function(){
+  var E = window.MorphEngine;
+  var DATA = [
+    ['button','按钮','按下 → 释放，弹簧回弹带轻微超调',['400×112','r56','click','4 拍']],
+    ['loader','加载器','收成圆，弧扫三圈后闭合成环',['168×168','r84','auto','4 拍']],
+    ['check','勾选','笔画自绘；强调色第一次出现',['168×168','r84','auto','4 拍']],
+    ['player','播放器','展开成卡片，播放与暂停反向旋转交替',['760×192','r32','click','4 拍']],
+    ['progress','进度条','抓住播放头拖动，松手从当前位置弹回',['880×64','r32','drag','4 拍']],
+    ['slider','音量滑块','拖过最大值：元素拉伸 6%，旋钮压扁',['560×88','r44','drag','4 拍']],
+    ['toggle','开关','旋钮前后缘各骑一个弹簧，翻转中途被拉长',['176×104','r52','click','4 拍']],
+    ['tabs','液体标签','指示器前缘先到，拖着后缘走',['520×96','r48','click','4 拍']],
+    ['chart','图表','折线自绘 1.25 拍，悬停升起 tooltip',['880×440','r28','hover','3.5 拍']],
+    ['palette','命令面板','三次输入实时过滤，回车选中首行',['680×360','r24','type','2.5 拍']],
+    ['notify','通知','一闪而过的 toast，随即变回按钮闭合循环',['560×140','r28','auto','0.75 拍']]
+  ];
+  var host = document.getElementById('list');
+  DATA.forEach(function(d){
+    var row = document.createElement('div');
+    row.className = 'row';
+    var chips = d[3].map(function(c){ return '<span class="chip">'+c+'</span>'; }).join('');
+    row.innerHTML =
+      '<video src="media/'+d[0]+'.mp4" autoplay muted loop playsinline></video>' +
+      '<div><div class="nm">'+d[1]+'<span class="cn">'+d[0]+'</span></div>' +
+      '<div class="desc">'+d[2]+'</div><div class="spec">'+chips+'</div></div>';
+    host.appendChild(row);
+  });
+})();
+</script>
+</body>
+</html>

@@ -645,6 +645,21 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;back
 
   function opts_cursorOpacity(refs, t) { return '1'; }
 
+  function setLabel(refs, name, desc) {
+    var s = refs.frame / 1440;
+    var lb = refs.label;
+    if (!lb) {
+      lb = document.createElement('div');
+      refs.root.appendChild(lb);
+      refs.label = lb;
+    }
+    lb.style.cssText = 'position:absolute;left:' + (56 * s) + 'px;bottom:' + (46 * s) + 'px;' +
+      'max-width:' + (900 * s) + 'px;pointer-events:none;font-family:Geist,-apple-system,BlinkMacSystemFont,sans-serif;';
+    lb.innerHTML =
+      '<div style="font-size:' + (27 * s) + 'px;font-weight:500;color:#0A0A0A;letter-spacing:-0.02em;line-height:1.2">' + name + '</div>' +
+      '<div style="margin-top:' + (8 * s) + 'px;font-size:' + (20 * s) + 'px;color:#8A857E;line-height:1.45">' + desc + '</div>';
+  }
+
   var CATALOG = [
     { key: 'button', name: 'Button', cn: '按钮', b0: 0, b1: 4 },
     { key: 'loader', name: 'Loader', cn: '加载器', b0: 4, b1: 8 },
@@ -661,7 +676,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;back
 
   global.MorphEngine = {
     BEAT: BEAT, TOTAL: T, TOTAL_BEATS: TOTAL_BEATS, C: C,
-    mount: mount, render: render, CATALOG: CATALOG, b2s: b2s
+    mount: mount, render: render, setLabel: setLabel, CATALOG: CATALOG, b2s: b2s
   };
 })(typeof window !== 'undefined' ? window : this);
 

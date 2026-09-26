@@ -68,19 +68,24 @@ Quote board（买/卖/价差）· P&L card · Depth bar · Position card · Orde
 ```
 src/engine.js              引擎：弹簧 / 时间轴 / 11 个状态渲染器
 src/morph.template.html    20s 循环动画模板（含播放控制与逐帧拖条）
-src/library.template.html  组件库总览页模板
-build.mjs                  把字体与引擎内联进模板 → dist/*.html（单文件）
+src/library.template.html  组件库总览页模板（实时渲染）
+src/component.template.html 单组件视频渲染页（画面内带标题与一句话说明）
+src/docs.template.html     视频总览页模板
+build.mjs                  把字体与引擎内联进模板 → dist/*.html + 根目录 index.html
 render.py                  Playwright 逐帧渲染 + ffmpeg tmix 动态模糊
 fonts/                     Geist woff2
-dist/                      单文件 HTML + mp4
+index.html                 组件视频总览页（每个组件 MP4 + 一句话说明）
+media/                     每个组件一段独立 MP4（1440×1440 / 60fps / 往返循环）
+dist/                      单文件 HTML + showreel mp4
 ```
 
 ## 本地运行
 
 ```bash
-node build.mjs                        # 生成 dist/*.html（单文件，零外链）
+node build.mjs                        # 生成 dist/*.html（单文件，零外链）+ index.html
 python render.py sheet                # 40 拍检查表，渲染前查偏离网格 / 拥挤
 python render.py one 12.75            # 单帧
+python render.py components           # 11 个组件各出一段 MP4 → media/
 python render.py video                # 60fps + 4 子帧混合 → dist/morph.mp4
 ```
 
@@ -89,6 +94,7 @@ python render.py video                # 60fps + 4 子帧混合 → dist/morph.mp
 ## 路线图
 
 - [x] 10 状态语法 + 引擎 + 组件库总览页 + 20s showreel
+- [x] 每组件独立 MP4（画面内带标题与一句话说明）+ 视频总览页 `index.html`
 - [ ] Quote Morph 金融展示页组件
 - [ ] 数据类 6 个组件
 - [ ] 金融类 5 个组件（不含 Quote Morph）
