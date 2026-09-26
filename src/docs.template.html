@@ -13,6 +13,9 @@ h1{font-size:22px;font-weight:500;letter-spacing:-0.02em}
 .sub{font-size:14px;color:#8A857E;margin-top:8px;line-height:1.6;max-width:760px}
 .rule{font-size:13px;color:#6E6A63;margin-top:14px;line-height:1.9}
 .rule b{font-weight:500;color:#0A0A0A}
+.sect{margin-top:40px}
+.sect h2{font-size:15px;font-weight:500;letter-spacing:-0.01em;padding-bottom:12px;border-bottom:1px solid rgba(10,10,10,0.10);display:flex;align-items:baseline;gap:10px}
+.sect h2 em{font-style:normal;font-size:12px;font-weight:400;color:#8A857E}
 .row{display:grid;grid-template-columns:400px 1fr;gap:32px;align-items:center;padding:28px 0;border-bottom:1px solid rgba(10,10,10,0.08)}
 @media (max-width:860px){.row{grid-template-columns:1fr;gap:18px}}
 video{width:400px;height:400px;max-width:100%;border-radius:12px;background:#E9E6E0;display:block}
@@ -34,10 +37,12 @@ footer{margin-top:40px;font-size:12px;color:#8A857E;line-height:1.8}
       一个元素永不切割，只改尺寸、圆角、颜色；内容在短暂模糊中切换。<br>
       光标驱动每一次变化 —— 按住时值由光标位置直接算出，松手从实际位置弹回。<br>
       领先边缘与尾随边缘骑不同弹簧，所以标签指示器和开关旋钮会在行程中被拉长。<br>
-      120 BPM，1 拍 = 0.5s，重拍对小节线。
+      120 BPM，1 拍 = 0.5s，重拍对小节线。<br>
+      金融区块只守一条配色纪律：<b>蓝 = 中性 / 操作，绿 = 涨，红 = 跌 / 风险过载</b>（国际口径，涨绿跌红）。
     </div>
   </header>
-  <div id="list"></div>
+  <div class="sect"><h2>基础 · Basic <em>11</em></h2><div class="grid" id="basic"></div></div>
+  <div class="sect"><h2>金融 · Quote Morph <em>11</em></h2><div class="grid" id="quote"></div></div>
   <footer>
     弹簧 ω 13–17 rad/s，ζ 0.60–0.72，最多轻微超调 · 画布 #F2F0ED · 墨 #0A0A0A · 强调 #4F8CFF · 涨 #30A46C / 跌 #E5484D · 字体 Geist<br>
     视频 1440×1440 / 60fps / 4 子帧混合动态模糊。文字说明只留一句，细节看源码。
@@ -47,29 +52,47 @@ footer{margin-top:40px;font-size:12px;color:#8A857E;line-height:1.8}
 /*__ENGINE__*/
 (function(){
   var E = window.MorphEngine;
-  var DATA = [
-    ['button','按钮','按下 → 释放，弹簧回弹带轻微超调',['400×112','r56','click','4 拍']],
-    ['loader','加载器','收成圆，弧扫三圈后闭合成环',['168×168','r84','auto','4 拍']],
-    ['check','勾选','笔画自绘；强调色第一次出现',['168×168','r84','auto','4 拍']],
-    ['player','播放器','展开成卡片，播放与暂停反向旋转交替',['760×192','r32','click','4 拍']],
-    ['progress','进度条','抓住播放头拖动，松手从当前位置弹回',['880×64','r32','drag','4 拍']],
-    ['slider','音量滑块','拖过最大值：元素拉伸 6%，旋钮压扁',['560×88','r44','drag','4 拍']],
-    ['toggle','开关','旋钮前后缘各骑一个弹簧，翻转中途被拉长',['176×104','r52','click','4 拍']],
-    ['tabs','液体标签','指示器前缘先到，拖着后缘走',['520×96','r48','click','4 拍']],
-    ['chart','图表','折线自绘 1.25 拍，悬停升起 tooltip',['880×440','r28','hover','3.5 拍']],
-    ['palette','命令面板','三次输入实时过滤，回车选中首行',['680×360','r24','type','2.5 拍']],
-    ['notify','通知','一闪而过的 toast，随即变回按钮闭合循环',['560×140','r28','auto','0.75 拍']]
-  ];
-  var host = document.getElementById('list');
-  DATA.forEach(function(d){
-    var row = document.createElement('div');
-    row.className = 'row';
-    var chips = d[3].map(function(c){ return '<span class="chip">'+c+'</span>'; }).join('');
-    row.innerHTML =
-      '<video src="media/'+d[0]+'.mp4" autoplay muted loop playsinline></video>' +
-      '<div><div class="nm">'+d[1]+'<span class="cn">'+d[0]+'</span></div>' +
-      '<div class="desc">'+d[2]+'</div><div class="spec">'+chips+'</div></div>';
-    host.appendChild(row);
+  var DATA = {
+    basic: [
+      ['button','按钮','按下 → 释放，弹簧回弹带轻微超调',['400×112','r56','click','4 拍']],
+      ['loader','加载器','收成圆，弧扫三圈后闭合成环',['168×168','r84','auto','4 拍']],
+      ['check','勾选','笔画自绘；强调色第一次出现',['168×168','r84','auto','4 拍']],
+      ['player','播放器','展开成卡片，播放与暂停反向旋转交替',['760×192','r32','click','4 拍']],
+      ['progress','进度条','抓住播放头拖动，松手从当前位置弹回',['880×64','r32','drag','4 拍']],
+      ['slider','音量滑块','拖过最大值：元素拉伸，旋钮压扁',['560×88','r44','drag','4 拍']],
+      ['toggle','开关','旋钮前后缘各骑一个弹簧，翻转中途被拉长',['176×104','r52','click','4 拍']],
+      ['tabs','液体标签','指示器前缘先到，拖着后缘走',['520×96','r48','click','4 拍']],
+      ['chart','图表','折线自绘 1.25 拍，悬停升起 tooltip',['880×440','r28','hover','3.5 拍']],
+      ['palette','命令面板','三次输入实时过滤，回车选中首行',['680×360','r24','type','2.5 拍']],
+      ['notify','通知','一闪而过的 toast，随即变回按钮闭合循环',['560×140','r28','auto','0.75 拍']]
+    ],
+    quote: [
+      ['quote','价格标签','报价 pill：代码 + 价格 + 涨跌幅，按下回弹',['440×120','r60','click','4 拍']],
+      ['feed','tick 接入','收成圆，弧扫三圈 —— 行情流接入',['168×168','r84','auto','4 拍']],
+      ['fill','成交确认','笔画自绘，订单成交',['168×168','r84','auto','4 拍']],
+      ['replay','分时回放','展开成卡片，绿色分时线自绘，播放与暂停交替',['760×192','r32','click','4 拍']],
+      ['timeline','时间轴拖拽','抓住播放头拖动，松手从当前位置弹回',['880×64','r32','drag','4 拍']],
+      ['leverage','杠杆滑块','拖过上限：整体拉伸、转风险红、相机后退',['560×88','r44','drag','4 拍']],
+      ['mode','模拟 / 实盘','旋钮前后缘各骑一个弹簧，翻转中途被拉长',['176×104','r52','click','4 拍']],
+      ['timeframe','周期切换','1m / 5m / 1h / 1D，指示器前缘先到拖着后缘',['520×96','r48','click','4 拍']],
+      ['equity','净值曲线','绿线自绘 + 回撤区浮现 + 悬停显示 −4.8%',['880×440','r28','hover','3.5 拍']],
+      ['search','代码搜索','输入 n → nv → nvd，列表实时收敛，回车选中',['680×404','r24','type','2.5 拍']],
+      ['notify','加自选通知','一闪而过，随即变回价格标签闭合循环',['560×140','r28','auto','0.75 拍']]
+    ]
+  };
+  var PREFIX = { basic: '', quote: 'quote-' };
+  ['basic','quote'].forEach(function(eng){
+    var host = document.getElementById(eng);
+    DATA[eng].forEach(function(d){
+      var row = document.createElement('div');
+      row.className = 'row';
+      var chips = d[3].map(function(c){ return '<span class="chip">'+c+'</span>'; }).join('');
+      row.innerHTML =
+        '<video src="media/'+PREFIX[eng]+d[0]+'.mp4" autoplay muted loop playsinline></video>' +
+        '<div><div class="nm">'+d[1]+'<span class="cn">'+d[0]+'</span></div>' +
+        '<div class="desc">'+d[2]+'</div><div class="spec">'+chips+'</div></div>';
+      host.appendChild(row);
+    });
   });
 })();
 </script>

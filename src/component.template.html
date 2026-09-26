@@ -16,12 +16,14 @@ body{width:1440px;height:1440px}
 /*__ENGINE__*/
 (function(){
   var E = window.MorphEngine;
-  var inst = E.mount(document.getElementById('stage'), {frame:1440, fitPx:1440*0.70});
+  var q = new URLSearchParams(location.search);
+  var eng = E.engines[q.get('engine') || 'basic'];
+  var inst = eng.mount(document.getElementById('stage'), {frame:1440, fitPx:1440*0.70});
   window.__setLabel = function(n, d){ E.setLabel(inst, n, d); };
-  window.__seek = function(t){ E.render(inst, t); };
+  window.__seek = function(t){ eng.render(inst, t); };
   window.MORPH_READY = true;
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ window.MORPH_READY = true; });
-  E.render(inst, 0);
+  eng.render(inst, 0);
 })();
 </script>
 </body>
