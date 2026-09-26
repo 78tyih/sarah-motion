@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shape Morph · 120 BPM · 20s loop</title>
+<style>
+/*__FONT__*/
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#EDEBE7;font-family:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:32px}
+#wrap{position:absolute;top:0;left:0;line-height:0;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(10,10,10,0.08)}
+#box{position:relative;margin:0 auto}
+#bar{width:760px;max-width:92vw;display:flex;align-items:center;gap:16px}
+.btn{height:38px;min-width:88px;border:0;border-radius:9px;background:#0A0A0A;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn.ghost{background:transparent;color:#0A0A0A;box-shadow:inset 0 0 0 1px rgba(10,10,10,0.16)}
+#scrub{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:rgba(10,10,10,0.14);outline:none}
+#scrub::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#4F8CFF;cursor:pointer}
+#scrub::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#4F8CFF;cursor:pointer}
+#read{font-size:13px;color:#8A857E;font-variant-numeric:tabular-nums;min-width:132px;text-align:right}
+#head{width:760px;max-width:92vw;display:flex;align-items:baseline;justify-content:space-between}
+h1{font-size:16px;font-weight:500;letter-spacing:-0.01em}
+#head span{font-size:13px;color:#8A857E}
+body.static{overflow:hidden}
+body.static #app{padding:0;gap:0;min-height:100vh;justify-content:center}
+body.static #head,body.static #bar{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="head">
+    <h1>Shape morph · one element, ten states</h1>
+    <span>120 BPM · 40 beats · 20.0s · perfect loop</span>
+  </div>
+  <div id="box"><div id="wrap"><div id="stage"></div></div></div>
+  <div id="bar">
+    <button class="btn" id="play">Pause</button>
+    <input type="range" id="scrub" min="0" max="20" step="0.001" value="0">
+    <div id="read">beat 1.0 · 0.50s</div>
+  </div>
+</div>
+<script>
+/*__ENGINE__*/
+(function(){
+  var E = window.MorphEngine;
+  var stage = document.getElementById('stage');
+  var inst = E.mount(stage, {frame:1440, fitPx:1440*0.70});
+  var playing = true, t = 0, last = 0;
+  var playBtn = document.getElementById('play');
+  var scrub = document.getElementById('scrub');
+  var read = document.getElementById('read');
+
+  function draw(){
+    E.render(inst, t);
+    scrub.value = t;
+    var b = (t / E.BEAT) % 40 + 1;
+    read.textContent = 'beat ' + b.toFixed(2) + ' · ' + t.toFixed(2) + 's';
+  }
+  function loop(now){
+    if(!last) last = now;
+    var dt = Math.min(0.05, (now - last)/1000);
+    last = now;
+    if(playing){ t += dt; if(t >= E.TOTAL) t -= E.TOTAL; }
+    draw();
+    requestAnimationFrame(loop);
+  }
+  playBtn.onclick = function(){ playing = !playing; playBtn.textContent = playing ? 'Pause' : 'Play'; };
+  scrub.oninput = function(){ t = parseFloat(scrub.value); draw(); };
+  window.addEventListener('keydown', function(e){ if(e.code === 'Space'){ e.preventDefault(); playBtn.click(); } });
+  window.__seek = function(v){ t = v; draw(); };
+  window.__stop = function(){ playing = false; };
+  window.MORPH_READY = false;
+
+  function fit(){
+    if(document.body.classList.contains('static')) return;
+    var s = Math.min(1, (window.innerWidth - 64)/1440, (window.innerHeight - 190)/1440);
+    var box = document.getElementById('box');
+    box.style.width = (1440*s) + 'px';
+    box.style.height = (1440*s) + 'px';
+    var w = document.getElementById('wrap');
+    w.style.transform = 'scale(' + s + ')';
+    w.style.transformOrigin = 'top left';
+  }
+  window.addEventListener('resize', fit); fit();
+
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ window.MORPH_READY = true; draw(); });
+  } else { window.MORPH_READY = true; }
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

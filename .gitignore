@@ -1,0 +1,6 @@
+frames/
+node_modules/
+__pycache__/
+.DS_Store
+fonts/geist-latin.b64
+fonts/geist.css

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Morph components · animated component library</title>
+<style>
+/*__FONT__*/
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#EDEBE7;font-family:Geist,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:40px 28px 64px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding-bottom:26px;border-bottom:1px solid rgba(10,10,10,0.10);margin-bottom:28px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:500;letter-spacing:-0.015em}
+.sub{font-size:13px;color:#8A857E;margin-top:6px;line-height:1.55}
+.tools{display:flex;gap:10px;align-items:center}
+.btn{height:36px;padding:0 16px;border:0;border-radius:9px;background:#0A0A0A;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn.ghost{background:transparent;color:#0A0A0A;box-shadow:inset 0 0 0 1px rgba(10,10,10,0.16)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+@media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:660px){.grid{grid-template-columns:1fr}}
+.card{min-width:0;background:#fff;border-radius:14px;padding:16px;box-shadow:0 0 0 1px rgba(10,10,10,0.07);display:flex;flex-direction:column;gap:12px}
+.stage{align-self:center;border-radius:10px;overflow:hidden;line-height:0}
+.meta{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.nm{font-size:14px;font-weight:500;letter-spacing:-0.01em}
+.cn{font-size:12px;color:#8A857E;margin-left:6px;font-weight:400}
+.beat{font-size:11px;color:#8A857E;font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{font-size:12px;color:#6E6A63;line-height:1.5;min-height:36px}
+footer{margin-top:34px;padding-top:22px;border-top:1px solid rgba(10,10,10,0.10);font-size:12px;color:#8A857E;line-height:1.7}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:rgba(10,10,10,0.05);padding:2px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Morph components</h1>
+      <div class="sub">Same element, eleven states. Every frame is a pure function of time &mdash; no CSS transitions, no timers, no state carried between frames.</div>
+    </div>
+    <div class="tools">
+      <button class="btn" id="all">Pause all</button>
+      <button class="btn ghost" id="slow">0.5&times;</button>
+    </div>
+  </header>
+  <div class="grid" id="grid"></div>
+  <footer>
+    120 BPM &middot; 40 beats &middot; 20.0s loop &middot; closed-form spring step response (&omega; 13&ndash;17 rad/s, &zeta; 0.60&ndash;0.72, slight overshoot only)<br>
+    Lead and trail edges ride separate springs on the tab indicator and the switch knob, so the leading edge arrives first and the shape stretches.<br>
+    Dragging is direct: while the cursor holds, the value is computed from cursor position; on release it springs back from where it actually is.
+  </footer>
+</div>
+<script>
+/*__ENGINE__*/
+(function(){
+  var E = window.MorphEngine;
+  var NOTES = {
+    button:    'Pill, 400×112, r56. Cursor presses on beat 2, releases on beat 3, spring returns with a slight overshoot.',
+    loader:    'Same element collapses to a 168 circle. Arc sweeps three turns, then closes into a ring on the downbeat.',
+    check:     'Stroke self-draws across 1.75 beats via dash offset. First appearance of the accent colour.',
+    player:    'Expands to 760×192. Play and pause counter-rotate and cross-scale between beats 13 and 14.5.',
+    progress:  '880×64 track. Cursor grabs the head on beat 16.75 and drags it; release springs back to the snap point.',
+    slider:    'Track narrows to 560×88. Dragged past maximum the whole element stretches 6% and the knob squashes.',
+    toggle:    '176×104. Knob rides two springs so it stretches mid-flip; track takes the accent only while on.',
+    tabs:      '520×96 segmented control. Indicator lead edge arrives before the trail edge, so it stretches on travel.',
+    chart:     '880×440 card. Line self-draws over 1.25 beats, then a hover tooltip rises on the measured peak.',
+    palette:   '680×360. Three keystrokes filter the list live; Enter selects row one on beat 37.75.',
+    notify:    '560×140 toast, held for three quarters of a beat, then morphs straight back into the button.'
+  };
+  var grid = document.getElementById('grid');
+  var cards = [];
+  E.CATALOG.forEach(function(item){
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="stage"></div>' +
+      '<div class="meta"><div><span class="nm">' + item.name + '</span><span class="cn">' + item.cn + '</span></div>' +
+      '<div class="beat">b' + item.b0 + '–' + item.b1 + '</div></div>' +
+      '<div class="note">' + NOTES[item.key] + '</div>';
+    grid.appendChild(card);
+    var st = card.querySelector('.stage');
+    var inst = E.mount(st, {frame:340, fitPx:340*0.76, cursorScale:340/1440*1.15});
+    var s0 = item.b0 + 0.50, s1 = item.b1 - 0.05;
+    var dur = Math.max(1.2, (s1 - s0) * E.BEAT);
+    cards.push({inst: inst, s0: s0, s1: s1, dur: dur, phase: Math.random() * dur});
+  });
+
+  var playing = true, rate = 1, last = 0;
+  function loop(now){
+    if(!last) last = now;
+    var dt = Math.min(0.05, (now - last)/1000) * (playing ? rate : 0);
+    last = now;
+    for(var i=0;i<cards.length;i++){
+      var c = cards[i];
+      c.phase = (c.phase + dt) % c.dur;
+      var u = c.phase / c.dur;
+      E.render(c.inst, (c.s0 + (c.s1 - c.s0) * u) * E.BEAT);
+    }
+    requestAnimationFrame(loop);
+  }
+  document.getElementById('all').onclick = function(){
+    playing = !playing;
+    this.textContent = playing ? 'Pause all' : 'Play all';
+  };
+  document.getElementById('slow').onclick = function(){
+    rate = rate === 1 ? 0.5 : rate === 0.5 ? 0.25 : 1;
+    this.textContent = rate + '×';
+  };
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
