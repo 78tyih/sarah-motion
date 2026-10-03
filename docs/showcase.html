@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sarah · 动效组件库 — 交互展示</title>
+<style>
+  :root{
+    --bg:#F2F0ED; --panel:#FFFFFF; --panel2:#EAE7E2; --ink:#0A0A0A; --ink2:#5a5650; --ink3:#9b958c;
+    --line:#DCD7CE; --line2:#CBC5BA;
+    --blue:#4F8CFF; --blue-soft:#E4EDFF; --up:#30A46C; --up-soft:#E0F2E8; --down:#E5484D; --down-soft:#FBE9EA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  html[data-theme="dark"]{
+    --bg:#141311; --panel:#1D1B18; --panel2:#262320; --ink:#EDEAE4; --ink2:#A8A297;
+    --ink3:#6E6859; --line:#302C27; --line2:#3D3831;
+    --blue:#6FA5FF; --blue-soft:#1E2A42; --up:#4FBE85; --up-soft:#1B3328; --down:#F07378; --down-soft:#3A2224;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 26px 90px}
+  header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
+  .hbar{max-width:1080px;margin:0 auto;padding:11px 26px;display:flex;align-items:center;gap:12px}
+  .logo{font-weight:750;font-size:15px;display:flex;align-items:center;gap:9px;letter-spacing:.01em}
+  .logo .sq{width:11px;height:11px;background:var(--blue);border-radius:3.5px}
+  .logo .sq.s2{background:var(--up);border-radius:50%;width:9px;height:9px}
+  .hbar .spacer{flex:1}
+  .toggle{border:1px solid var(--line2);background:var(--panel);color:var(--ink2);border-radius:8px;padding:5px 12px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .toggle:hover{color:var(--ink);border-color:var(--blue)}
+  .repo-link{font-size:12.5px;color:var(--ink2);text-decoration:none;font-family:var(--mono)}
+  .repo-link:hover{color:var(--blue)}
+
+  .hero{padding:52px 0 30px;border-bottom:1px solid var(--line)}
+  .kicker{font-size:11.5px;letter-spacing:.22em;color:var(--blue);font-weight:700;margin-bottom:14px;text-transform:uppercase;font-family:var(--mono)}
+  h1{font-size:36px;font-weight:780;letter-spacing:-.015em;line-height:1.22;margin-bottom:13px}
+  .sub{color:var(--ink2);font-size:15.5px;max-width:660px}
+  .metaline{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .chip{font-size:12px;color:var(--ink2);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-family:var(--mono)}
+  .chip b{color:var(--ink);font-weight:650}
+  .chip.hl{background:var(--blue-soft);border-color:transparent;color:var(--blue)}
+  .chip.hl b{color:var(--blue)}
+
+  section{padding:42px 0 6px}
+  .sec-head{display:flex;align-items:baseline;gap:13px;margin-bottom:20px}
+  .sec-no{font-family:var(--mono);font-size:11.5px;color:var(--ink3);border:1px solid var(--line2);border-radius:6px;padding:2px 8px}
+  h2{font-size:21px;font-weight:740;letter-spacing:-.01em}
+  .sec-q{font-size:12.5px;color:var(--ink3);margin-left:auto;text-align:right}
+  .note{font-size:13.5px;color:var(--ink2);max-width:700px;margin-bottom:18px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+
+  /* hero videos */
+  .hero-videos{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+  .hv{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+  .hv video{width:100%;display:block;aspect-ratio:1/1;object-fit:contain;background:var(--bg)}
+  .hv .cap{padding:9px 13px;font-size:12.5px;color:var(--ink2);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .hv .cap b{color:var(--ink);font-weight:600;font-size:13px}
+  .hv .tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .tag.basic{background:var(--blue-soft);color:var(--blue)}
+  .tag.quote{background:var(--up-soft);color:var(--up)}
+  .tag.warn{background:var(--down-soft);color:var(--down)}
+
+  /* Q1 comparison */
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .vs .side{border-radius:12px;padding:18px 20px;border:1px solid var(--line)}
+  .vs .side.bad{background:var(--panel)}
+  .vs .side.good{background:var(--blue-soft);border-color:transparent}
+  .vs .side h3{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .vs .side.bad h3{color:var(--down)} .vs .side.good h3{color:var(--blue)}
+  .vs li{list-style:none;font-size:13.5px;color:var(--ink2);padding:7px 0;border-top:1px solid var(--line);line-height:1.55}
+  .vs .side.good li{border-color:rgba(79,140,255,.25)}
+  .vs li b{color:var(--ink);font-weight:600}
+
+  /* scenario table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11px;font-family:var(--mono);color:var(--ink3);letter-spacing:.08em;padding:8px 10px;border-bottom:1px solid var(--line2);font-weight:600;text-transform:uppercase}
+  td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6}
+  tr:last-child td{border-bottom:none}
+  td .was{color:var(--ink2)} td .now{color:var(--ink)}
+  .ok-pill{font-family:var(--mono);font-size:11px;background:var(--up-soft);color:var(--up);border-radius:5px;padding:2px 8px;white-space:nowrap;display:inline-block}
+
+  /* architecture SVG */
+  .arch{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  svg text{font-family:inherit}
+
+  /* syntax rules */
+  .rules{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .rule{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start}
+  .rule .rn{flex:none;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:6px;padding:3px 8px;margin-top:2px}
+  .rule b{font-size:13.5px;display:block}
+  .rule span{font-size:12.5px;color:var(--ink2)}
+
+  .tokenbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+  .swatch{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;color:var(--ink2);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 11px}
+  .swatch i{width:13px;height:13px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.12)}
+
+  /* reuse matrix */
+  .reuse-note{display:flex;gap:11px;align-items:flex-start;background:var(--down-soft);border-radius:10px;padding:13px 16px;font-size:13px;margin-top:14px;line-height:1.6}
+  .reuse-note b{color:var(--down)}
+
+  /* component grid */
+  .fam-head{display:flex;align-items:center;gap:10px;margin:26px 0 12px}
+  .fam-head h3{font-size:16px;font-weight:700}
+  .fam-head .cnt{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .fam-head .line{flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+  .card{border-radius:11px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+  .card video{width:100%;display:block;aspect-ratio:16/10;object-fit:contain;background:var(--bg)}
+  .card .cap{padding:8px 12px;font-size:12px;color:var(--ink2);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:6px;align-items:center}
+  .card .cap b{color:var(--ink);font-weight:600;font-size:12.5px}
+  .card .cap .fn{font-family:var(--mono);font-size:10px;color:var(--ink3)}
+
+  /* evidence */
+  .ev{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+  .ev .ebox{border-radius:11px;border:1px solid var(--line);padding:16px 18px;background:var(--panel)}
+  .ev .ebox h4{font-size:13px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .ev .obs h4{color:var(--up)} .ev .inf h4{color:var(--ink2)} .ev .unk h4{color:var(--down)}
+  .ev .ebox li{list-style:none;font-size:12.5px;color:var(--ink2);padding:6px 0;border-top:1px solid var(--line);line-height:1.55}
+  .ev .ebox li b{color:var(--ink)}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);display:flex;gap:16px;flex-wrap:wrap}
+  footer a{color:var(--ink2);text-decoration:none} footer a:hover{color:var(--blue)}
+  footer .mono{font-family:var(--mono)}
+
+  @media (max-width:900px){
+    .hero-videos,.grid{grid-template-columns:repeat(2,1fr)}
+    .vs,.rules,.ev{grid-template-columns:1fr}
+    h1{font-size:29px}
+  }
+  .en{display:none}
+  html[data-lang="en"] .zh{display:none}
+  html[data-lang="en"] .en{display:inline}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="logo"><span class="sq"></span><span class="sq s2"></span>Sarah<span style="color:var(--ink3);font-weight:400">· motion</span></div>
+    <div class="spacer"></div>
+    <a class="repo-link" href="https://github.com/78tyih/sarah-motion" target="_blank">78tyih/sarah-motion ↗</a>
+    <button class="toggle" id="langBtn" onclick="toggleLang()">EN</button>
+    <button class="toggle" id="themeBtn" onclick="toggleTheme()">☀︎ Dark</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">library · motion · pure function of time</div>
+  <h1><span class="zh">动效组件库<br>每个组件都是时间的纯函数</span><span class="en">A motion library where every component is a pure function of time</span></h1>
+  <p class="sub zh">可任意跳转、可逐帧控制、20 秒循环闭合到零像素差。不是动效 demo 集——是一套有语法、spec 驱动的库，含金融 UI 组件族。</p>
+  <p class="sub en">Seekable, frame-exact, loop-closing to zero pixel diff. Not a demo dump — a grammar-governed, spec-driven library with a finance UI family.</p>
+  <div class="metaline">
+    <span class="chip hl"><b>11</b> basic components</span>
+    <span class="chip hl"><b>11</b> quote-morph components</span>
+    <span class="chip"><b>20.0s</b> closed loop</span>
+    <span class="chip"><b>60fps</b> · <b>120</b> BPM</span>
+    <span class="chip">loop max diff <b>= 0</b> px</span>
+    <span class="chip">license: <b style="color:var(--down)">none yet</b></span>
+  </div>
+
+  <div class="hero-videos">
+    <div class="hv">
+      <video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/tabs.mp4" controls muted playsinline preload="metadata" loop></video>
+      <div class="cap"><b><span class="zh">液体标签 · 双弹簧拉伸</span><span class="en">Liquid tabs · dual-spring stretch</span></b><span class="tag basic">BASIC</span></div>
+    </div>
+    <div class="hv">
+      <video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-leverage.mp4" controls muted playsinline preload="metadata" loop></video>
+      <div class="cap"><b><span class="zh">杠杆滑块 · 过载变形</span><span class="en">Leverage · overload morph</span></b><span class="tag warn">SIGNATURE</span></div>
+    </div>
+    <div class="hv">
+      <video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-equity.mp4" controls muted playsinline preload="metadata" loop></video>
+      <div class="cap"><b><span class="zh">净值曲线 · 自绘 + tooltip</span><span class="en">Equity curve · self-drawn</span></b><span class="tag quote">QUOTE</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Q1 -->
+<section id="q1">
+  <div class="sec-head"><span class="sec-no">Q1</span><h2><span class="zh">解决什么问题</span><span class="en">Problem</span></h2><span class="sec-q"><span class="zh">为什么现成的动效 demo 不够用</span><span class="en">Why existing motion demos fall short</span></span></div>
+  <div class="vs">
+    <div class="side bad">
+      <h3>✕ <span class="zh">普通动效 demo</span><span class="en">Typical motion demos</span></h3>
+      <ul>
+        <li><span class="zh"><b>不能跳转</b> — CSS transition / 定时器驱动，只能从头播到尾</span><span class="en"><b>No seeking</b> — CSS transitions &amp; timers only play forward</span></li>
+        <li><span class="zh"><b>循环会抖</b> — 0.03px 残差就够让文字栅格化挪一个设备像素</span><span class="en"><b>Loops seam</b> — a 0.03px residual visibly jitters text rasterization</span></li>
+        <li><span class="zh"><b>金融组件缺位</b> — 报价、杠杆、回放没人做</span><span class="en"><b>No finance family</b> — quotes, leverage, replay are nobody's job</span></li>
+      </ul>
+    </div>
+    <div class="side good">
+      <h3>✓ Sarah</h3>
+      <ul>
+        <li><span class="zh"><b>seek(t) 纯函数</b> — 无 CSS transition、无定时器、无帧间状态，任意时刻可求值</span><span class="en"><b>seek(t) pure function</b> — no transitions, no timers, no carried state; evaluable at any instant</span></li>
+        <li><span class="zh"><b>闭合零像素差</b> — 末段弹簧 ω24/ζ0.85 快收，残差 1e-7 级，t=0 vs t=20 max diff = 0</span><span class="en"><b>Zero-diff closure</b> — final springs ω24/ζ0.85, residual ~1e-7; t=0 vs t=20 max diff = 0</span></li>
+        <li><span class="zh"><b>金融组件族</b> — 11 个 Quote Morph 组件，配色纪律：蓝=操作、绿=涨、红=跌/风险</span><span class="en"><b>Finance family</b> — 11 Quote Morph components; blue=action, green=up, red=down/risk</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Q2 -->
+<section id="q2">
+  <div class="sec-head"><span class="sec-no">Q2</span><h2><span class="zh">什么场景，得到什么结果</span><span class="en">Scenario → Outcome</span></h2><span class="sec-q"><span class="zh">三个真实用法</span><span class="en">Three real uses</span></span></div>
+  <div class="panel" style="padding:8px 20px">
+    <table>
+      <thead><tr><th><span class="zh">场景</span><span class="en">Scenario</span></th><th><span class="zh">原来的困难</span><span class="en">Before</span></th><th><span class="zh">Sarah 的做法</span><span class="en">How</span></th><th><span class="zh">结果</span><span class="en">Outcome</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b><span class="zh">产品宣传视频需要无缝循环</span><span class="en">Seamless promo loops</span></b></td>
+          <td class="was"><span class="zh">循环点肉眼可见地抖一下，剪片子只能掐头去尾</span><span class="en">Visible seam at the loop point</span></td>
+          <td class="now"><span class="zh">末段弹簧快收 + 末帧=首帧含光标位置与速度</span><span class="en">Fast-settling final springs; last frame = first frame, cursor included</span></td>
+          <td><span class="ok-pill">max diff = 0 px</span></td>
+        </tr>
+        <tr>
+          <td><b><span class="zh">金融/交易界面动效</span><span class="en">Finance UI motion</span></b></td>
+          <td class="was"><span class="zh">通用库不管报价/杠杆/回放，配色各写各的</span><span class="en">Generic libs skip finance; color discipline is ad-hoc</span></td>
+          <td class="now"><span class="zh">Quote Morph spec 族 + 一条配色纪律</span><span class="en">Quote Morph spec family + one color rule</span></td>
+          <td><span class="ok-pill">11 components</span></td>
+        </tr>
+        <tr>
+          <td><b><span class="zh">拖拽回放 / 逐帧控制</span><span class="en">Scrubbing / frame control</span></b></td>
+          <td class="was"><span class="zh">CSS 动画没法倒着拖，Lottie 只能播</span><span class="en">CSS can't scrub backwards; Lottie only plays</span></td>
+          <td class="now"><span class="zh">光标按住时值由光标位置直接算出，释放从实际位置弹回</span><span class="en">Held cursor directly computes the value; release springs from actual position</span></td>
+          <td><span class="ok-pill">seek(t) any t</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Q3 -->
+<section id="q3">
+  <div class="sec-head"><span class="sec-no">Q3</span><h2><span class="zh">什么结构</span><span class="en">Architecture</span></h2><span class="sec-q">spec-driven · <span class="zh">加组件族不动核心</span><span class="en">new family = new spec, not core change</span></span></div>
+  <div class="arch">
+    <svg viewBox="0 0 980 240" style="width:100%;height:auto" role="img" aria-label="architecture pipeline">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink3)"/></marker></defs>
+      <!-- spec layer -->
+      <rect x="20" y="30" width="170" height="72" rx="10" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.4"/>
+      <text x="105" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">spec</text>
+      <text x="105" y="80" text-anchor="middle" font-size="11" fill="var(--ink2)">basic · quote</text>
+      <!-- engine -->
+      <rect x="240" y="30" width="200" height="72" rx="10" fill="var(--panel2)" stroke="var(--line2)"/>
+      <text x="340" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">MorphEngine</text>
+      <text x="340" y="72" text-anchor="middle" font-size="10.5" fill="var(--ink2)">闭式弹簧 · 时间轴 · 渲染器</text>
+      <text x="340" y="90" text-anchor="middle" font-size="10.5" fill="var(--ink2)">closed-form springs · timeline</text>
+      <!-- build -->
+      <rect x="500" y="14" width="200" height="56" rx="10" fill="var(--panel2)" stroke="var(--line2)"/>
+      <text x="600" y="36" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">build.mjs</text>
+      <text x="600" y="55" text-anchor="middle" font-size="10.5" fill="var(--ink2)">引擎+字体 内联 → 单文件 HTML</text>
+      <!-- render -->
+      <rect x="500" y="92" width="200" height="56" rx="10" fill="var(--panel2)" stroke="var(--line2)"/>
+      <text x="600" y="114" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">render.py</text>
+      <text x="600" y="133" text-anchor="middle" font-size="10.5" fill="var(--ink2)">Playwright 逐子帧 → ffmpeg tmix</text>
+      <!-- outputs -->
+      <rect x="760" y="14" width="200" height="56" rx="10" fill="var(--up-soft)" stroke="var(--up)" stroke-width="1.2"/>
+      <text x="860" y="36" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">dist/*.html</text>
+      <text x="860" y="55" text-anchor="middle" font-size="10.5" fill="var(--ink2)">零外链单文件</text>
+      <rect x="760" y="92" width="200" height="56" rx="10" fill="var(--up-soft)" stroke="var(--up)" stroke-width="1.2"/>
+      <text x="860" y="114" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">media/*.mp4</text>
+      <text x="860" y="133" text-anchor="middle" font-size="10.5" fill="var(--ink2)">22 组件 · 无缝往返循环</text>
+      <!-- verify loop -->
+      <rect x="500" y="176" width="460" height="48" rx="10" fill="var(--panel2)" stroke="var(--line2)" stroke-dasharray="5 3"/>
+      <text x="730" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">loop closure check · <tspan font-family="var(--mono)" fill="var(--blue)">render.py loop</tspan></text>
+      <text x="730" y="214" text-anchor="middle" font-size="10.5" fill="var(--ink2)">t=0 vs t=20 逐像素比对 → max diff = 0</text>
+      <!-- edges -->
+      <line x1="190" y1="66" x2="235" y2="66" stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#a2)"/>
+      <line x1="440" y1="50" x2="495" y2="42" stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#a2)"/>
+      <line x1="440" y1="82" x2="495" y2="112" stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#a2)"/>
+      <line x1="700" y1="42" x2="755" y2="42" stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#a2)"/>
+      <line x1="700" y1="120" x2="755" y2="120" stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#a2)"/>
+      <line x1="860" y1="148" x2="860" y2="172" stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#a2)"/>
+      <line x1="498" y1="148" x2="400" y2="180" stroke="var(--ink3)" stroke-width="1" stroke-dasharray="4 3"/>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <div class="rule"><span class="rn">R1</span><div><b><span class="zh">每帧从时间计算</span><span class="en">Every frame computes from time</span></b><span class="zh">seek(t) 纯函数，无 CSS transition、无定时器、无帧间状态</span><span class="en">seek(t) pure function; no transitions, timers, or carried state</span></div></div>
+    <div class="rule"><span class="rn">R2</span><div><b><span class="zh">弹簧是闭式解</span><span class="en">Springs are closed-form</span></b><span>x(t) = x₀ + Σ Δᵢ·step(t−tᵢ)</span></div></div>
+    <div class="rule"><span class="rn">R3</span><div><b><span class="zh">拖拽是直接操作</span><span class="en">Drag is direct manipulation</span></b><span class="zh">按住=光标位置直出，释放=从实际位置弹回</span><span class="en">Hold = cursor value; release springs from actual position</span></div></div>
+    <div class="rule"><span class="rn">R4</span><div><b><span class="zh">双弹簧边缘</span><span class="en">Dual-spring edges</span></b><span class="zh">领先 ω17 / 尾随 ω13，行程中形状被拉伸</span><span class="en">Lead ω17 / trail ω13; shape stretches mid-travel</span></div></div>
+    <div class="rule"><span class="rn">R5</span><div><b><span class="zh">内容切换有进出时机</span><span class="en">Content switch timing</span></b><span class="zh">旧出 0.20s → 新进 0.25s，不重叠</span><span class="en">Old blurs out 0.20s → new blurs in 0.25s, never overlapping</span></div></div>
+    <div class="rule"><span class="rn">R6</span><div><b><span class="zh">循环必须闭合</span><span class="en">Loops must close</span></b><span class="zh">末帧=首帧含光标；末段 ≥0.6s 且 ω≥20</span><span class="en">Last frame = first, cursor included; final segment ≥0.6s, ω≥20</span></div></div>
+  </div>
+
+  <div class="tokenbar">
+    <span style="font-family:var(--mono);font-size:10.5px;color:var(--ink3);letter-spacing:.12em">TOKENS</span>
+    <span class="swatch"><i style="background:#F2F0ED"></i>#F2F0ED <span class="zh">画布</span><span class="en">canvas</span></span>
+    <span class="swatch"><i style="background:#0A0A0A"></i>#0A0A0A <span class="zh">墨</span><span class="en">ink</span></span>
+    <span class="swatch"><i style="background:#4F8CFF"></i>#4F8CFF <span class="zh">强调·激活</span><span class="en">accent</span></span>
+    <span class="swatch"><i style="background:#30A46C"></i>#30A46C <span class="zh">涨</span><span class="en">up</span></span>
+    <span class="swatch"><i style="background:#E5484D"></i>#E5484D <span class="zh">跌·风险</span><span class="en">down</span></span>
+    <span class="swatch"><span class="zh">ω 13–17 · ζ 0.60–0.72</span><span class="en">ω 13–17 · ζ 0.60–0.72</span></span>
+    <span class="swatch">120 BPM</span>
+  </div>
+</section>
+
+<!-- Q4 -->
+<section id="q4">
+  <div class="sec-head"><span class="sec-no">Q4</span><h2><span class="zh">能复用什么</span><span class="en">Value &amp; Reuse</span></h2><span class="sec-q"><span class="zh">哪块能抄、带什么走</span><span class="en">what to copy, what to bring</span></span></div>
+  <div class="panel" style="padding:8px 20px">
+    <table>
+      <thead><tr><th><span class="zh">可复用部分</span><span class="en">Part</span></th><th><span class="zh">在哪</span><span class="en">Where</span></th><th><span class="zh">条件</span><span class="en">Condition</span></th><th><span class="zh">怎么接</span><span class="en">How</span></th></tr></thead>
+      <tbody>
+        <tr><td><b><span class="zh">六条动效语法</span><span class="en">The six rules</span></b></td><td><span class="zh">本页 Q3 / README</span><span class="en">Q3 above / README</span></td><td><span class="zh">无依赖</span><span class="en">none</span></td><td><span class="zh">任何动画项目直接采用为约束</span><span class="en">adopt as constraints in any motion project</span></td></tr>
+        <tr><td><b><span class="zh">弹簧闭式解公式</span><span class="en">Closed-form spring</span></b></td><td><code>src/engine.js</code></td><td>JS</td><td><span class="zh">抄公式换参数</span><span class="en">copy the formula, swap params</span></td></tr>
+        <tr><td><b><span class="zh">渲染管线</span><span class="en">Render pipeline</span></b></td><td><code>render.py</code></td><td>Python + Playwright + ffmpeg</td><td><span class="zh">复制脚本换模板</span><span class="en">copy script, point at your template</span></td></tr>
+        <tr><td><b>Quote Morph spec <span class="zh">族</span><span class="en">family</span></b></td><td><code>src/engine.js</code></td><td><span class="zh">沿用配色纪律</span><span class="en">keep color discipline</span></td><td><span class="zh">作 spec 参考改写</span><span class="en">use as spec reference</span></td></tr>
+        <tr><td><b><span class="zh">设计 token / 节拍网格</span><span class="en">Tokens / beat grid</span></b></td><td><span class="zh">本页 Q3</span><span class="en">Q3 above</span></td><td><span class="zh">无依赖</span><span class="en">none</span></td><td><span class="zh">直接取值</span><span class="en">take values as-is</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="reuse-note">
+    <b>⚖︎</b>
+    <span><span class="zh"><b>授权边界：</b>仓库暂无 LICENSE 文件（2026-10-03 实查）——默认版权保留。<b>方法论（六条语法、token、管线思路）可自由参考；代码复制需先补授权</b>。</span><span class="en"><b>License boundary:</b> no LICENSE file as of 2026-10-03 — all rights reserved by default. The methodology is free to reference; copying code needs licensing first.</span></span>
+  </div>
+</section>
+
+<!-- gallery -->
+<section id="gallery">
+  <div class="sec-head"><span class="sec-no">22</span><h2><span class="zh">全部组件 · 可直接播放</span><span class="en">All components · playable</span></h2><span class="sec-q"><span class="zh">每个都是无缝往返循环</span><span class="en">each a seamless ping-pong loop</span></span></div>
+
+  <div class="fam-head"><h3><span class="zh">基础组件</span><span class="en">Basic</span></h3><span class="cnt">11 · general UI</span><div class="line"></div></div>
+  <div class="grid">
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/button.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Button</b><span class="fn">button.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/loader.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Loader</b><span class="fn">loader.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/check.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Checkmark</b><span class="fn">check.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/player.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Music player</b><span class="fn">player.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/progress.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Progress</b><span class="fn">progress.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/slider.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Volume slider</b><span class="fn">slider.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/toggle.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Switch</b><span class="fn">toggle.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/tabs.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Liquid tabs</b><span class="fn">tabs.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/chart.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Chart</b><span class="fn">chart.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/palette.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Palette</b><span class="fn">palette.mp4</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/notify.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>Notification</b><span class="fn">notify.mp4</span></div></div>
+  </div>
+
+  <div class="fam-head"><h3>Quote Morph · <span class="zh">金融组件</span><span class="en">Finance</span></h3><span class="cnt">11 · blue=action · green=up · red=risk</span><div class="line"></div></div>
+  <div class="grid">
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-quote.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">价格标签</span><span class="en">Price tag</span></b><span class="fn">quote-quote</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-feed.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">行情 tick 流</span><span class="en">Tick feed</span></b><span class="fn">quote-feed</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-fill.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">成交确认</span><span class="en">Fill confirm</span></b><span class="fn">quote-fill</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-replay.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">行情回放</span><span class="en">Session replay</span></b><span class="fn">quote-replay</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-timeline.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">回放时间轴</span><span class="en">Scrub timeline</span></b><span class="fn">quote-timeline</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-leverage.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">杠杆滑块·过载</span><span class="en">Leverage·overload</span></b><span class="fn">quote-leverage</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-mode.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">模拟/实盘</span><span class="en">Paper/Live</span></b><span class="fn">quote-mode</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-timeframe.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>1m/5m/1h/1D</b><span class="fn">quote-timeframe</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-equity.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">净值曲线</span><span class="en">Equity curve</span></b><span class="fn">quote-equity</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-search.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b>⌘K <span class="zh">搜索</span><span class="en">search</span></b><span class="fn">quote-search</span></div></div>
+    <div class="card"><video src="https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/quote-notify.mp4" controls muted playsinline preload="metadata" loop></video><div class="cap"><b><span class="zh">自选通知</span><span class="en">Watchlist toast</span></b><span class="fn">quote-notify</span></div></div>
+  </div>
+</section>
+
+<!-- evidence -->
+<section id="evidence">
+  <div class="sec-head"><span class="sec-no">✓</span><h2><span class="zh">验证与限制</span><span class="en">Evidence &amp; Limits</span></h2><span class="sec-q"><span class="zh">分级：实测 / 自述 / 未知</span><span class="en">graded: observed / inferred / unknown</span></span></div>
+  <div class="ev">
+    <div class="ebox obs">
+      <h4>● Observed · <span class="zh">已验证</span><span class="en">verified</span></h4>
+      <ul>
+        <li><span class="zh"><b>22 个 MP4</b> 存在于 media/（GitHub API 实查 2026-10-03，最大 468KB）</span><span class="en"><b>22 MP4s</b> in media/ (GitHub API, 2026-10-03)</span></li>
+        <li><span class="zh"><b>仓库结构</b>与声明一致：engine.js + 4 模板 + build.mjs + render.py</span><span class="en"><b>Repo structure</b> matches claims</span></li>
+      </ul>
+    </div>
+    <div class="ebox inf">
+      <h4>◐ Inferred · <span class="zh">自述未复核</span><span class="en">self-reported</span></h4>
+      <ul>
+        <li><span class="zh"><b>闭合 max diff = 0</b>：README 自述；<code>render.py loop</code> 本地一跑即可升级为已验证</span><span class="en"><b>Closure = 0</b>: README claim; one local run upgrades it</span></li>
+        <li><span class="zh"><b>60fps / 120BPM / 20.0s</b>：设计参数</span><span class="en"><b>60fps / 120BPM / 20.0s</b>: design parameters</span></li>
+      </ul>
+    </div>
+    <div class="ebox unk">
+      <h4>○ Unknown · <span class="zh">已知缺口</span><span class="en">gaps</span></h4>
+      <ul>
+        <li><span class="zh">数据可视化 6 组件、金融 5 组件未交付（路线图）</span><span class="en">Data-viz &amp; extra finance components not yet shipped</span></li>
+        <li><span class="zh">无 LICENSE 文件 → 代码复制需授权</span><span class="en">No LICENSE → code copying needs permission</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="mono">Sarah · showcase v0.1 · 2026-10-03</span>
+  <a href="https://github.com/78tyih/sarah-motion" target="_blank">GitHub ↗</a>
+  <a href="https://github.com/78tyih/sarah-motion/blob/main/index.html" target="_blank"><span class="zh">组件视频总览</span><span class="en">Video index</span></a>
+  <a href="https://github.com/78tyih/sarah-motion/issues" target="_blank">Issues ↗</a>
+  <span><span class="zh">视频经 jsDelivr CDN 分发</span><span class="en">videos served via jsDelivr CDN</span></span>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  var t = p.get('theme'), l = p.get('lang');
+  if(!t) t = localStorage.getItem('sm-theme');
+  if(!l) l = localStorage.getItem('sm-lang');
+  if(!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if(!l) l = 'zh';
+  apply(t, l);
+  function apply(theme, lang){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    localStorage.setItem('sm-theme', theme);
+    localStorage.setItem('sm-lang', lang);
+    document.getElementById('themeBtn').textContent = theme === 'light' ? '☀︎ Dark' : '☀︎ Light';
+    document.getElementById('langBtn').textContent = lang === 'zh' ? 'EN' : '中';
+  }
+  window.toggleTheme = function(){ apply(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark', document.documentElement.getAttribute('data-lang')); };
+  window.toggleLang = function(){ apply(document.documentElement.getAttribute('data-theme'), document.documentElement.getAttribute('data-lang')==='zh'?'en':'zh'); };
+})();
+</script>
+</body>
+</html>

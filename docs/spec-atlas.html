@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sarah · 组件规格图谱 — 数据类×6 + 金融类×6</title>
+<style>
+  :root{
+    --bg:#F2F0ED; --panel:#FFFFFF; --panel2:#EAE7E2; --ink:#0A0A0A; --ink2:#5a5650; --ink3:#9b958c;
+    --line:#DCD7CE; --line2:#CBC5BA;
+    --blue:#4F8CFF; --blue-soft:#E4EDFF; --up:#30A46C; --up-soft:#E0F2E8; --down:#E5484D; --down-soft:#FBE9EA;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  html[data-theme="dark"]{
+    --bg:#141311; --panel:#1D1B18; --panel2:#262320; --ink:#EDEAE4; --ink2:#A8A297; --ink3:#6E6859;
+    --line:#302C27; --line2:#3D3831;
+    --blue:#6FA5FF; --blue-soft:#1E2A42; --up:#4FBE85; --up-soft:#1B3328; --down:#F07378; --down-soft:#3A2224;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 26px 90px}
+
+  header{position:sticky;top:0;z-index:60;background:var(--panel);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
+  .hbar{max-width:1100px;margin:0 auto;padding:10px 26px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .logo{font-weight:750;font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .logo .sq{width:10px;height:10px;background:var(--blue);border-radius:3px}
+  .hbar .spacer{flex:1}
+  .transport{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+  .tbtn{border:1px solid var(--line2);background:var(--panel);color:var(--ink2);border-radius:7px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)}
+  .tbtn:hover{color:var(--ink);border-color:var(--blue)}
+  #scrub{width:170px;accent-color:var(--blue)}
+  .beatdot{width:9px;height:9px;border-radius:50%;background:var(--blue);transition:none}
+  select.tbtn{padding:4px 6px}
+  .toggle{border:1px solid var(--line2);background:var(--panel);color:var(--ink2);border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer}
+  .toggle:hover{color:var(--ink);border-color:var(--blue)}
+
+  .hero{padding:44px 0 28px;border-bottom:1px solid var(--line)}
+  .kicker{font-size:11px;letter-spacing:.22em;color:var(--blue);font-weight:700;margin-bottom:12px;font-family:var(--mono);text-transform:uppercase}
+  h1{font-size:31px;font-weight:770;letter-spacing:-.015em;line-height:1.25;margin-bottom:12px}
+  .sub{color:var(--ink2);font-size:14.5px;max-width:680px}
+  .metaline{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{font-size:11.5px;color:var(--ink2);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-family:var(--mono)}
+  .chip b{color:var(--ink);font-weight:650}
+  .chip.new{background:var(--down-soft);border-color:transparent;color:var(--down)}
+  .chip.new b{color:var(--down)}
+
+  section{padding:40px 0 6px}
+  .sec-head{display:flex;align-items:baseline;gap:13px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:11.5px;color:var(--ink3);border:1px solid var(--line2);border-radius:6px;padding:2px 8px}
+  h2{font-size:20px;font-weight:740;letter-spacing:-.01em}
+  .sec-q{font-size:12.5px;color:var(--ink3);margin-left:auto;text-align:right}
+  .note{font-size:13.5px;color:var(--ink2);max-width:720px;margin-bottom:18px}
+
+  /* allocation strips */
+  .alloc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .alloc-row{margin:14px 0}
+  .alloc-lab{font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.12em;margin-bottom:7px;display:flex;gap:10px;align-items:baseline}
+  .alloc-lab b{color:var(--ink);font-size:12px}
+  .strip{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .seg{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;color:#fff;position:relative}
+  .seg.intro{background:var(--panel2);color:var(--ink3);font-family:var(--mono);font-size:9.5px}
+  .seg.c0{background:#4F8CFF}.seg.c1{background:#3E79E8}.seg.c2{background:#3568CC}.seg.c3{background:#2C57B0}
+  .seg.c4{background:#4F8CFF}.seg.c5{background:#3E79E8}
+  .seg.warn::after{content:"";position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--down)}
+  .seg small{font-family:var(--mono);font-weight:400;opacity:.75;font-size:9px;margin-left:4px}
+  .alloc-foot{font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:10px}
+
+  /* cards */
+  .fam-title{display:flex;align-items:center;gap:10px;margin:34px 0 14px}
+  .fam-title h3{font-size:16.5px;font-weight:730}
+  .fam-title .cnt{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .fam-title .ln{flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .scard{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px 18px 12px}
+  .scard-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .ftag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;border-radius:5px;padding:2px 7px}
+  .ftag.data{background:var(--blue-soft);color:var(--blue)}
+  .ftag.finance{background:var(--up-soft);color:var(--up)}
+  .ftag.fin{background:var(--up-soft);color:var(--up)}
+  .scard-head b{font-size:14.5px;font-weight:680}
+  .bcnt{margin-left:auto;font-size:10.5px;color:var(--ink3)}
+  .proto{background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .psvg{width:100%;height:auto;display:block}
+  .tagline{font-size:12.5px;color:var(--ink2);margin:10px 0 10px;line-height:1.55}
+  table.spec{width:100%;border-collapse:collapse;font-size:12px}
+  table.spec th{width:64px;text-align:left;font-weight:600;color:var(--ink3);font-size:11px;padding:5px 8px 5px 0;vertical-align:top;white-space:nowrap}
+  table.spec td{padding:5px 0;border-top:1px solid var(--line);color:var(--ink);line-height:1.5}
+  .scard .sig{display:inline-block;font-family:var(--mono);font-size:9.5px;background:var(--down-soft);color:var(--down);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+
+  /* contract */
+  .contract{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .cbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 19px}
+  .cbox h4{font-size:13.5px;margin-bottom:9px;display:flex;gap:7px;align-items:center}
+  .cbox ul{list-style:none}
+  .cbox li{font-size:12.5px;color:var(--ink2);padding:6px 0;border-top:1px solid var(--line);line-height:1.55}
+  .cbox li b{color:var(--ink);font-weight:600}
+  .cbox code{font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+
+  footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);display:flex;gap:16px;flex-wrap:wrap}
+  footer .mono{font-family:var(--mono)}
+
+  /* svg text/fill classes */
+  .cB{fill:var(--blue)} .cU{fill:var(--up)} .cD{fill:var(--down)} .cI{fill:var(--ink)} .cI2{fill:var(--ink3)} .cP{fill:var(--panel)} .cPst{fill:var(--panel);stroke:var(--line)}
+  .ln{stroke:var(--line);stroke-width:1}
+  .pB{stroke:var(--blue);stroke-linecap:round;stroke-linejoin:round}
+  .pU{stroke:var(--up);stroke-linecap:round}
+  .pD{stroke:var(--down);stroke-linecap:round}
+  .pI{stroke:var(--ink);stroke-linecap:round}
+  .pL{stroke:var(--line)}
+  .stB{stroke:var(--blue);fill:none}
+  .stU{stroke:var(--up);fill:none}
+  .stD{stroke:var(--down);fill:none}
+  .stL{stroke:var(--line);fill:none}
+  .tx{font-size:9px;fill:var(--ink2);font-family:var(--mono)}
+  .txs{font-size:8px;fill:var(--ink3);font-family:var(--mono)}
+  .txm{font-size:11px;fill:var(--ink);font-weight:600}
+  .txb{font-size:13px;fill:var(--ink);font-weight:700}
+  .txw{font-size:9px;fill:#fff;font-weight:600;font-family:var(--mono)}
+  .txg{font-size:9px;fill:var(--up);font-weight:700;font-family:var(--mono)}
+  .txr{font-size:9px;fill:var(--down);font-weight:700;font-family:var(--mono)}
+  .cst{stroke:var(--line)}
+
+  @media (max-width:900px){ .grid,.contract{grid-template-columns:1fr} h1{font-size:26px} }
+  .en{display:none}
+  html[data-lang="en"] .zh{display:none}
+  html[data-lang="en"] .en{display:inline}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="logo"><span class="sq"></span>Sarah · <span style="color:var(--ink3);font-weight:400">spec atlas</span></div>
+    <div class="spacer"></div>
+    <div class="transport">
+      <button class="tbtn" id="playBtn">⏸ pause</button>
+      <input type="range" id="scrub" min="0" max="8" step="0.01" value="0">
+      <span class="beatdot" id="beat"></span>
+      <span id="clockLab">0.0s</span>
+      <select class="tbtn" id="speedSel">
+        <option value="0.25">0.25×</option>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+      </select>
+    </div>
+    <button class="toggle" id="langBtn" onclick="toggleLang()">EN</button>
+    <button class="toggle" id="themeBtn" onclick="toggleTheme()">☀︎ Dark</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="hero">
+  <div class="kicker">spec sheet v0.1 · live prototypes · pure function of time</div>
+  <h1><span class="zh">组件规格图谱：数据类 ×6 + 金融类 ×6</span><span class="en">Component Spec Atlas: Data ×6 + Finance ×6</span></h1>
+  <p class="sub zh">路线图上「规划中」的 12 个组件，在这里变成可执行的规格 + 可拖动验证的实时原型。原型不是 CSS 动画——是库自己的语法：闭式弹簧、seek(t) 纯时间函数，拖进度条到任意时刻即为 R1 的直接演示。配色纪律全程执行：蓝=中性/操作，绿=涨，红=跌/风险。</p>
+  <p class="sub en">The 12 roadmap components become executable specs plus live prototypes. No CSS transitions — prototypes run the library's own grammar: closed-form springs, seek(t) pure functions. Scrub anywhere to see Rule R1. Color discipline throughout: blue=neutral/action, green=up, red=down/risk.</p>
+  <div class="metaline">
+    <span class="chip"><b>6</b> data components</span>
+    <span class="chip"><b>6</b> finance components</span>
+    <span class="chip"><span class="zh">每原型 <b>8s / 16 拍</b> @120BPM</span><span class="en">each proto <b>8s / 16 beats</b> @120BPM</span></span>
+    <span class="chip">springs <b>ω13–17 ζ0.6–0.72</b></span>
+    <span class="chip new"><span class="zh"><b>新提案</b>：第 6 个金融组件「回撤水位」</span><span class="en"><b>new proposal</b>: 6th finance component "Drawdown meter"</span></span>
+  </div>
+</div>
+
+<!-- A: allocation -->
+<section id="alloc">
+  <div class="sec-head"><span class="sec-no">A</span><h2><span class="zh">家族闭环拍位分配</span><span class="en">Family Loop Beat Allocation</span></h2><span class="sec-q">20s · 40 beats · <span class="zh">与已交付的两个家族同构</span><span class="en">isomorphic with shipped families</span></span></div>
+  <p class="note zh">每个新家族沿用已验证的 20 秒闭环结构：前奏 2 拍 + 每组件 6 拍（3s）+ 尾奏 2 拍。红色右缘 = 该组件含「过载」签名动作（拉伸 + 转警示色）。</p>
+  <p class="note en">Each family keeps the proven 20s closed loop: 2-beat intro + 6 beats (3s) per component + 2-beat outro. Red right edge = component carries the overload signature (stretch + warning color).</p>
+  <div class="alloc">
+    <div class="alloc-row">
+      <div class="alloc-lab"><b>engines.data</b> <span class="zh">· 数据类 20s 闭环</span><span class="en">· data family 20s loop</span></div>
+      <div class="strip">
+        <div class="seg intro" style="width:5%">2</div>
+        <div class="seg c0" style="width:15%">Sparkline<small>6</small></div>
+        <div class="seg c1" style="width:15%">Candle<small>6</small></div>
+        <div class="seg c2" style="width:15%">Donut<small>6</small></div>
+        <div class="seg c3" style="width:15%">Gauge<small>6</small></div>
+        <div class="seg c4 warn" style="width:15%"><span class="zh">热力条</span><span class="en">Heatbar</span><small>6</small></div>
+        <div class="seg c5" style="width:15%">Ticker<small>6</small></div>
+        <div class="seg intro" style="width:5%">2</div>
+      </div>
+    </div>
+    <div class="alloc-row">
+      <div class="alloc-lab"><b>engines.finance</b> <span class="zh">· 金融类 20s 闭环</span><span class="en">· finance family 20s loop</span></div>
+      <div class="strip">
+        <div class="seg intro" style="width:5%">2</div>
+        <div class="seg c0" style="width:15%"><span class="zh">报价板</span><span class="en">Quote board</span><small>6</small></div>
+        <div class="seg c1" style="width:15%">P&amp;L<small>6</small></div>
+        <div class="seg c2" style="width:15%"><span class="zh">深度条</span><span class="en">Depth</span><small>6</small></div>
+        <div class="seg c3" style="width:15%"><span class="zh">持仓卡</span><span class="en">Position</span><small>6</small></div>
+        <div class="seg c4" style="width:15%"><span class="zh">订单通知</span><span class="en">Order toast</span><small>6</small></div>
+        <div class="seg c5 warn" style="width:15%"><span class="zh">回撤水位</span><span class="en">Drawdown</span><small>6</small></div>
+        <div class="seg intro" style="width:5%">2</div>
+      </div>
+    </div>
+    <div class="alloc-foot">beat = 0.5s @ 120 BPM · bar = 4 beats = 2s · loop closure acceptance: t=0 vs t=20 max diff = 0 px</div>
+  </div>
+</section>
+
+<!-- B: data family -->
+<section id="data">
+  <div class="sec-head"><span class="sec-no">B</span><h2><span class="zh">数据类组件 ×6</span><span class="en">Data Components ×6</span></h2><span class="sec-q"><span class="zh">通用数据展示，蓝为主色</span><span class="en">general data display, blue-led</span></span></div>
+  <div class="fam-title"><h3>engines.data</h3><span class="cnt">6 specs · 6 live prototypes</span><div class="ln"></div></div>
+  <div class="grid" id="grid-data"></div>
+</section>
+
+<!-- C: finance family -->
+<section id="finance">
+  <div class="sec-head"><span class="sec-no">C</span><h2><span class="zh">金融类组件 ×6</span><span class="en">Finance Components ×6</span></h2><span class="sec-q">blue=action · green=up · red=risk</span></div>
+  <div class="fam-title"><h3>engines.finance</h3><span class="cnt">6 specs · 6 live prototypes · <span style="color:var(--down)">1 new proposal</span></span><div class="ln"></div></div>
+  <div class="grid" id="grid-fin"></div>
+</section>
+
+<!-- D: contract -->
+<section id="contract">
+  <div class="sec-head"><span class="sec-no">D</span><h2><span class="zh">实施契约：从规格到 MP4</span><span class="en">Implementation Contract: Spec → MP4</span></h2><span class="sec-q"><span class="zh">批准后进引擎</span><span class="en">into the engine after approval</span></span></div>
+  <div class="contract">
+    <div class="cbox">
+      <h4>① <span class="zh">spec 形态（引擎扩展）</span><span class="en">Spec shape (engine extension)</span></h4>
+      <ul>
+        <li><span class="zh"><b>四键 spec</b>：<code>geometry</code>（形状与参数）· <code>windows</code>（拍位/时窗）· <code>content</code>（内容渲染与切换）· <code>cursor</code>（光标行为）</span><span class="en"><b>Four keys</b>: geometry, windows, content, cursor</span></li>
+        <li><span class="zh"><b>注册不动核心</b>：<code>engines.data</code> / <code>engines.finance</code> 各挂一份 spec，MorphEngine 零改动</span><span class="en"><b>No core change</b>: register under engines.data / engines.finance</span></li>
+        <li><span class="zh"><b>过载签名复用</b>：热力条与回撤水位的「拉伸+转红」直接复用杠杆滑块的 overload 变形通道</span><span class="en"><b>Overload reuse</b>: stretch+red channel from the leverage slider</span></li>
+      </ul>
+    </div>
+    <div class="cbox">
+      <h4>② <span class="zh">验收（与现有家族同标准）</span><span class="en">Acceptance (same bar as shipped families)</span></h4>
+      <ul>
+        <li><span class="zh"><b>循环闭合</b>：末段弹簧 ω≥20 快收，<code>render.py loop data|finance</code> → max diff = 0</span><span class="en"><b>Closure</b>: final springs ω≥20; render.py loop → max diff = 0</span></li>
+        <li><span class="zh"><b>渲染</b>：<code>render.py components data</code> / <code>components finance</code> → 12 个 MP4 入 media/</span><span class="en"><b>Render</b>: render.py components → 12 MP4s into media/</span></li>
+        <li><span class="zh"><b>节奏</b>：全部动作落 120BPM 网格（重拍对小节线），tmix×4 动态模糊</span><span class="en"><b>Rhythm</b>: actions on the 120BPM grid; tmix×4 motion blur</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="mono">Sarah · spec atlas v0.1 · 2026-10-03</span>
+  <span><span class="zh">原型引擎：闭式弹簧（ω15 ζ0.65 基线，过载/复位按规格定制）· 无 CSS transition · 拖动进度条 = R1 演示</span><span class="en">Prototype engine: closed-form springs · no CSS transitions · scrub = R1 demo</span></span>
+  <span><span class="zh">本页为规格稿，实现进入 sarah-motion 引擎需 Sera 批准</span><span class="en">Spec sheet; implementation into the engine pending approval</span></span>
+</footer>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- theme / lang ---------- */
+function apply(t,l){
+  document.documentElement.setAttribute('data-theme',t);
+  document.documentElement.setAttribute('data-lang',l);
+  document.documentElement.setAttribute('lang',l==='zh'?'zh-CN':'en');
+  localStorage.setItem('sat-theme',t);localStorage.setItem('sat-lang',l);
+  document.getElementById('themeBtn').textContent = t==='light'?'☀︎ Dark':'☀︎ Light';
+  document.getElementById('langBtn').textContent = l==='zh'?'EN':'中';
+}
+var p=new URLSearchParams(location.search);
+var th=p.get('theme')||localStorage.getItem('sat-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+var lg=p.get('lang')||localStorage.getItem('sat-lang')||'zh';
+apply(th,lg);
+window.toggleTheme=function(){apply(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark',document.documentElement.getAttribute('data-lang'));};
+window.toggleLang=function(){apply(document.documentElement.getAttribute('data-theme'),document.documentElement.getAttribute('data-lang')==='zh'?'en':'zh');};
+
+/* ---------- mini engine: closed-form springs, pure function of time ---------- */
+var NS='http://www.w3.org/2000/svg';
+function el(n,at,parent){var e=document.createElementNS(NS,n);for(var k in at)e.setAttribute(k,at[k]);if(parent)parent.appendChild(e);return e;}
+function st(tau,o,z){o=o||15;z=z||0.65;if(tau<=0)return 0;var wd=o*Math.sqrt(1-z*z);return 1-Math.exp(-z*o*tau)*(Math.cos(wd*tau)+(z*o/wd)*Math.sin(wd*tau));}
+function Sp(x0){this.x0=x0;this.ev=[];this.cur=x0;}
+Sp.prototype.to=function(t,g,o,z){this.ev.push([t,g-this.cur,o||15,z||0.65]);this.cur=g;return this;};
+Sp.prototype.v=function(t){var x=this.x0;for(var i=0;i<this.ev.length;i++){var e=this.ev[i];if(t>=e[0])x+=e[1]*st(t-e[0],e[2],e[3]);}return x;};
+function sw(t,t0,out,inn){out=out||0.2;inn=inn||0.25;var o=t<t0?1:(t<t0+out?1-(t-t0)/out:0);var n=t<t0+out?0:(t<t0+out+inn?(t-t0-out)/inn:1);return [o,n];}
+function setSW(g,o,n){g.setAttribute('opacity',Math.max(o,n*0.001));g.style.filter='blur('+((1-n)*4).toFixed(2)+'px)';g.style.opacity=Math.max(o,n).toFixed(3);}
+function blurOnly(g,v){g.style.filter=v>0.05?('blur('+v.toFixed(2)+'px)'):'none';}
+
+/* ---------- card factory ---------- */
+var CARDS=[];
+function card(def){
+  try{
+    var grid=document.getElementById(def.fam==='data'?'grid-data':'grid-fin');
+    var c=document.createElement('div');c.className='scard';
+    var head=document.createElement('div');head.className='scard-head';
+    head.innerHTML='<span class="ftag '+(def.fam==='data'?'data':'fin')+'">'+(def.fam==='data'?'DATA':'FIN')+'</span><b><span class="zh">'+def.zh+'</span><span class="en">'+def.en+'</span>'+(def.sig?'<span class="sig">overload</span>':'')+'</b><span class="bcnt mono">'+def.beats+' beats</span>';
+    c.appendChild(head);
+    var proto=document.createElement('div');proto.className='proto';c.appendChild(proto);
+    var svg=el('svg',{viewBox:'0 0 260 150',class:'psvg'},proto);
+    var tag=document.createElement('p');tag.className='tagline';
+    tag.innerHTML='<span class="zh">'+def.tzh+'</span><span class="en">'+def.ten+'</span>';
+    c.appendChild(tag);
+    var tb=document.createElement('table');tb.className='spec';var rows='';
+    for(var i=0;i<def.specs.length;i++){var s=def.specs[i];
+      rows+='<tr><th><span class="zh">'+s[0]+'</span><span class="en">'+s[1]+'</span></th><td><span class="zh">'+s[2]+'</span><span class="en">'+s[3]+'</span></td></tr>';}
+    tb.innerHTML='<tbody>'+rows+'</tbody>';c.appendChild(tb);
+    grid.appendChild(c);
+    var r=def.build(svg);
+    CARDS.push({render:r,phase:def.phase||0});
+  }catch(e){console.error('card',def&&def.zh,e);}
+}
+
+/* ============================================================
+   DATA FAMILY ×6
+   ============================================================ */
+
+/* 1 · Sparkline */
+card({fam:'data',zh:'Sparkline · 迷你走势线',en:'Sparkline',beats:16,phase:0,
+ tzh:'揭示窗沿时间轴推进，末端实点脉冲；末端斜率决定涨跌色。悬停弹值。',ten:'Reveal window rides the timeline; endpoint pulses; slope decides green/red.',
+ specs:[
+  ['形态','Form','单线自绘 + 末端实点 + 悬停值签','self-drawing line + live dot + hover tag'],
+  ['语义','Meaning','趋势方向与最新值','trend direction & latest value'],
+  ['关键动作','Key action','揭示窗推进（6 拍）→ 值签弹出 → 涨跌翻色 → 末端脉冲','reveal → tag pop → color flip → pulse'],
+  ['光标','Cursor','悬停 = 跟随值签（直接操作）','hover = following value tag'],
+  ['弹簧','Springs','揭示窗 ω13 ζ0.65；值签 ω15','reveal ω13; tag ω15'],
+  ['配色','Color','线=蓝；末端斜率定绿/红','line blue; slope→green/red'],
+  ['节拍','Beats','16 拍：揭示6 · 弹签2 · 翻色3 · 脉冲3 · 收2','16: reveal6·tag2·flip3·pulse3·end2']
+ ],
+ build:function(svg){
+  var V=[2,5,9,7,4,1,3,8,12,10,7,9,13,11,8,11,15,13,10,13,17,15,18,21,19,23];
+  var pts=[];for(var i=0;i<V.length;i++)pts.push([16+i*(228/25),108-V[i]*2.1]);
+  el('line',{x1:14,y1:118,x2:246,y2:118,class:'ln'},svg);
+  var path=el('path',{class:'pB','stroke-width':2.5,fill:'none'},svg);
+  var dot=el('circle',{r:4,class:'cB'},svg);
+  var tip=el('g',{},svg);
+  el('rect',{x:196,y:8,width:54,height:20,rx:5,class:'cP cst'},tip);
+  var tt=el('text',{x:223,y:21,'text-anchor':'middle',class:'txm'},tip);tt.textContent='108.4';
+  var chip=el('g',{},svg);
+  el('rect',{x:190,y:34,width:58,height:16,rx:8,class:'cU'},chip);
+  var ct=el('text',{x:219,y:45.5,'text-anchor':'middle',class:'txw'},chip);ct.textContent='+2.4%';
+  var rev=new Sp(0);rev.to(0.4,1);
+  return function(t){
+    var p=Math.max(0,Math.min(1,rev.v(t)));
+    var n=1+(pts.length-1)*p,k=Math.floor(n),f=n-k;
+    var d='M'+pts[0][0].toFixed(1)+' '+pts[0][1].toFixed(1);
+    var lim=Math.min(k,pts.length-1);
+    for(var i=1;i<=lim;i++)d+=' L'+pts[i][0].toFixed(1)+' '+pts[i][1].toFixed(1);
+    var ex,ey;
+    if(k<pts.length-1){var a=pts[k],b=pts[k+1];ex=a[0]+(b[0]-a[0])*f;ey=a[1]+(b[1]-a[1])*f;d+=' L'+ex.toFixed(1)+' '+ey.toFixed(1);}
+    else{ex=pts[pts.length-1][0];ey=pts[pts.length-1][1];}
+    path.setAttribute('d',d);
+    dot.setAttribute('cx',ex);dot.setAttribute('cy',ey);
+    var pulse=(t>5.5&&t<7.5)?1+0.35*Math.sin((t-5.5)*7):1;
+    dot.setAttribute('r',(4*pulse).toFixed(2));
+    var to=st(t-3.0),s=sw(t,4.2);
+    tip.setAttribute('opacity',(to*0.95).toFixed(3));
+    tip.style.filter='blur('+((1-to)*4).toFixed(2)+'px)';
+    chip.setAttribute('opacity',s[1].toFixed(3));
+    chip.style.filter='blur('+((1-s[1])*4).toFixed(2)+'px)';
+  };
+ }});
+
+/* 2 · Candle */
+card({fam:'data',zh:'Candle · K 线',en:'Candle',beats:16,phase:0.7,
+ tzh:'五根历史 K 线依次弹簧生长，第六根实时跳动；方向翻转时价格签模糊切换（R5）。',ten:'Five candles spring up in sequence; the sixth is live; direction flip blurs the price tag (R5).',
+ specs:[
+  ['形态','Form','影线 + 实体，逐根生长；末根实时','wick + body, staggered growth; live last'],
+  ['语义','Meaning','OHLC 与最新方向','OHLC & live direction'],
+  ['关键动作','Key action','逐根生长（stagger）→ 实时根跳价 → 翻色','staggered growth → live ticks → flip'],
+  ['光标','Cursor','拖动 = 移动网格基准（规划）','drag pans the grid (planned)'],
+  ['弹簧','Springs','生长 ω14 ζ0.68；实时根 ω13','growth ω14; live ω13'],
+  ['配色','Color','阳=绿 / 阴=红（国际口径）','up=green / down=red'],
+  ['节拍','Beats','16 拍：生长5 · 实时6 · 翻色3 · 收2','16: grow5·live6·flip3·end2']
+ ],
+ build:function(svg){
+  var D=[{o:70,c:60,h:52,l:78},{o:60,c:64,h:55,l:70},{o:64,c:48,h:44,l:68},{o:48,c:58,h:42,l:64},{o:58,c:44,h:40,l:62},{o:44,c:50,h:38,l:56}];
+  function Y(v){return v*1.3+18;}
+  var els=[];
+  for(var i=0;i<6;i++){
+    var g=el('g',{},svg);
+    var wick=el('line',{class:'pL','stroke-width':1.5},g);
+    var body=el('rect',{width:16,rx:2},g);
+    var x=40+i*36-8;
+    body.setAttribute('x',x);
+    els.push({wick:wick,body:body,D:D[i],x:40+i*36});
+  }
+  var tagA=el('g',{},svg),tagB=el('g',{},svg);
+  el('rect',{x:186,y:8,width:56,height:16,rx:8,class:'cU'},tagA);
+  var tA=el('text',{x:214,y:19,'text-anchor':'middle',class:'txw'},tagA);tA.textContent='3,942 ▲';
+  el('rect',{x:186,y:8,width:56,height:16,rx:8,class:'cD'},tagB);
+  var tB=el('text',{x:214,y:19,'text-anchor':'middle',class:'txw'},tagB);tB.textContent='3,901 ▼';
+  var live=new Sp(50);live.to(4.0,42);live.to(4.8,55);live.to(5.6,44);
+  return function(t){
+    for(var i=0;i<5;i++){
+      var e=els[i],g=st(t-(0.3+i*0.45));
+      var d=e.D,o=Y(Math.max(d.o,d.c)),cl=Y(Math.min(d.o,d.c));
+      e.wick.setAttribute('x1',e.x);e.wick.setAttribute('x2',e.x);
+      e.wick.setAttribute('y1',(Y(d.h)+(Y(d.l)-Y(d.h))*g).toFixed(1));
+      e.wick.setAttribute('y2',Y(d.l).toFixed(1));
+      var up=d.c<d.o;
+      e.body.setAttribute('class',up?'cU':'cD');
+      e.body.setAttribute('y',o.toFixed(1));
+      e.body.setAttribute('height',Math.max(1,((cl-o)*g).toFixed(1)));
+      e.body.setAttribute('opacity','1');
+    }
+    var e6=els[5],lv=live.v(t),up6=t<6;
+    var o6=Y(Math.max(e6.D.o,lv)),c6=Y(Math.min(e6.D.o,lv));
+    e6.wick.setAttribute('x1',e6.x);e6.wick.setAttribute('x2',e6.x);
+    e6.wick.setAttribute('y1',Y(e6.D.h).toFixed(1));e6.wick.setAttribute('y2',Y(e6.D.l).toFixed(1));
+    e6.body.setAttribute('class',up6?'cU':'cD');
+    e6.body.setAttribute('y',o6.toFixed(1));
+    e6.body.setAttribute('height',Math.max(1,c6-o6).toFixed(1));
+    var s=sw(t,6);
+    setSW(tagA,s[0],t<6?1:0);setSW(tagB,0,s[1]);
+  };
+ }});
+
+/* 3 · Donut */
+card({fam:'data',zh:'Donut · 环形占比',en:'Donut',beats:16,phase:1.4,
+ tzh:'三段弧依次扫入，主力段中途「抬起」强调；中心标签模糊切换读数（R5）。',ten:'Three arcs sweep in; the lead segment lifts for emphasis; the center label blur-switches (R5).',
+ specs:[
+  ['形态','Form','三段环形弧 + 中心读数','three annular arcs + center readout'],
+  ['语义','Meaning','占比结构','composition'],
+  ['关键动作','Key action','分段扫入（stagger）→ 主段抬起 → 标签切换','sweep-in → lift → label switch'],
+  ['光标','Cursor','悬停段 = 抬起 + 读数跟随','hover = lift + readout'],
+  ['弹簧','Springs','扫角 ω14 ζ0.68；抬起 ω13','sweep ω14; lift ω13'],
+  ['配色','Color','蓝三档透明度（数据中性，不占涨跌语义）','blue at 3 opacities (data-neutral)'],
+  ['节拍','Beats','16 拍：扫入4 · 抬起3 · 切换3 · 归位4 · 收2','16: sweep4·lift3·switch3·return4·end2']
+ ],
+ build:function(svg){
+  function arc(cx,cy,r0,r1,a0,a1){
+    function pt(r,a){var rad=(a-90)*Math.PI/180;return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)];}
+    var lg=(a1-a0)>180?1:0;
+    var s0=pt(r0,a0),s1=pt(r1,a0),e1=pt(r1,a1),e0=pt(r0,a1);
+    return 'M'+s0[0].toFixed(1)+' '+s0[1].toFixed(1)+' L'+s1[0].toFixed(1)+' '+s1[1].toFixed(1)+' A'+r1+' '+r1+' 0 '+lg+' 1 '+e1[0].toFixed(1)+' '+e1[1].toFixed(1)+' L'+e0[0].toFixed(1)+' '+e0[1].toFixed(1)+' A'+r0+' '+r0+' 0 '+lg+' 0 '+s0[0].toFixed(1)+' '+s0[1].toFixed(1)+' Z';}
+  var shares=[0.45,0.32,0.23],ops=[1,0.55,0.3];
+  var segs=[],start=-90;
+  for(var i=0;i<3;i++){
+    segs.push({p:el('path',{class:'cB','fill-opacity':ops[i]},svg),a0:start,share:shares[i]*360});
+    start+=shares[i]*360;
+  }
+  var labA=el('g',{},svg),labB=el('g',{},svg);
+  var lA1=el('text',{x:130,y:76,'text-anchor':'middle',class:'txm'},labA);lA1.textContent='A 45%';
+  var lA2=el('text',{x:130,y:90,'text-anchor':'middle',class:'txs'},labA);lA2.textContent='主力段';
+  var lB1=el('text',{x:130,y:76,'text-anchor':'middle',class:'txm'},labB);lB1.textContent='B 32%';
+  var lB2=el('text',{x:130,y:90,'text-anchor':'middle',class:'txs'},labB);lB2.textContent='次段';
+  return function(t){
+    for(var i=0;i<3;i++){
+      var s=segs[i];
+      var sweep=s.share*st(t-(0.3+i*0.35));
+      var lift=(i===1)?6*(st(t-3.5)-st(t-6.5)):0;
+      s.p.setAttribute('d',arc(130,80,34,52+lift,s.a0,s.a0+sweep));
+    }
+    var swb=sw(t,4.5);
+    setSW(labA,swb[0],t<4.5?1:0);setSW(labB,0,swb[1]);
+  };
+ }});
+
+/* 4 · Gauge */
+card({fam:'data',zh:'Gauge · 仪表盘',en:'Gauge',beats:16,phase:2.1,
+ tzh:'指针闭式弹簧扫动，越过危险区时红弧脉冲；可直接拖动指针（R3 直接操作）。',ten:'Needle sweeps on closed-form springs; the danger arc pulses past threshold; drag the needle directly (R3).',
+ specs:[
+  ['形态','Form','240° 弧带 + 指针 + 读数','240° band + needle + value'],
+  ['语义','Meaning','量值与危险阈值','value vs danger threshold'],
+  ['关键动作','Key action','三段扫值（55→82→30）→ 危险区脉冲','sweep 55→82→30 → danger pulse'],
+  ['光标','Cursor','按住 = 指针直读光标角；释放从实际角弹回','hold = needle follows cursor; release springs back'],
+  ['弹簧','Springs','指针 ω15 ζ0.65','needle ω15'],
+  ['配色','Color','值弧=蓝；危险区=红；读数=墨','value arc blue; danger red'],
+  ['节拍','Beats','16 拍：扫入6 · 高位脉冲4 · 回落4 · 收2','16: sweep6·pulse4·fall4·end2']
+ ],
+ build:function(svg){
+  var cx=130,cy=88,R=54;
+  function ang(v){return v*2.4-120;}
+  function pt(r,a){var rad=(a-90)*Math.PI/180;return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)];}
+  function arcP(r,a0,a1){var s=pt(r,a0),e=pt(r,a1);var lg=(a1-a0)>180?1:0;return 'M'+s[0].toFixed(1)+' '+s[1].toFixed(1)+' A'+r+' '+r+' 0 '+lg+' 1 '+e[0].toFixed(1)+' '+e[1].toFixed(1);}
+  el('path',{d:arcP(R,-120,120),class:'stL','stroke-width':8},svg);
+  var danger=el('path',{d:arcP(R,ang(75),120),class:'stD','stroke-width':8},svg);
+  var valArc=el('path',{class:'stB','stroke-width':8},svg);
+  var needle=el('line',{class:'pI','stroke-width':3},svg);
+  el('circle',{cx:cx,cy:cy,r:5,class:'cI'},svg);
+  var vt=el('text',{x:130,y:132,'text-anchor':'middle',class:'txb'},svg);
+  var hint=el('text',{x:130,y:22,'text-anchor':'middle',class:'txs'},svg);
+  hint.textContent='drag ↕';
+  var nd=new Sp(0);nd.to(0.5,55);nd.to(3,82);nd.to(5,30);
+  var drag=null;
+  svg.style.cursor='grab';
+  function ptr(ev){
+    var r=svg.getBoundingClientRect();
+    var x=(ev.clientX-r.left)/r.width*260-cx,y=(ev.clientY-r.top)/r.height*150-cy;
+    var a=Math.atan2(x,-y)*180/Math.PI;
+    return Math.max(-120,Math.min(120,a));
+  }
+  svg.addEventListener('pointerdown',function(ev){drag=ptr(ev);svg.setPointerCapture&&svg.setPointerCapture(ev.pointerId);ev.preventDefault();});
+  svg.addEventListener('pointermove',function(ev){if(drag!=null)drag=ptr(ev);});
+  window.addEventListener('pointerup',function(){drag=null;});
+  return function(t){
+    var v=drag!=null?((drag+120)/2.4):nd.v(t);
+    v=Math.max(0,Math.min(100,v));
+    var a=ang(v);
+    valArc.setAttribute('d',arcP(R,-120,Math.max(a,-119.5)));
+    var tip=pt(R-10,a);
+    needle.setAttribute('x1',cx);needle.setAttribute('y1',cy);
+    needle.setAttribute('x2',tip[0].toFixed(1));needle.setAttribute('y2',tip[1].toFixed(1));
+    vt.textContent=Math.round(v);
+    var hot=v>75;
+    danger.setAttribute('opacity',hot?(0.55+0.45*Math.abs(Math.sin(t*4))).toFixed(3):0.25);
+  };
+ }});
+
+/* 5 · Heatbar */
+card({fam:'data',zh:'Heatbar · 热力条',en:'Heatbar',beats:16,phase:2.8,sig:true,
+ tzh:'水位沿阶梯逐格点亮；越过阈值后整条拉伸 + 顶端转警示红（过载签名），回落即复位。',ten:'Cells light in a staircase; past the threshold the bar stretches and the top turns red (overload signature); falls back on reset.',
+ specs:[
+  ['形态','Form','20 格阶梯条 + 阈值线','20-cell staircase + threshold line'],
+  ['语义','Meaning','负载水位与限额','load level vs limit'],
+  ['关键动作','Key action','阶梯上升 → 触限拉伸转红 → 回落','staircase up → overload stretch → reset'],
+  ['光标','Cursor','拖动 = 直接设定水位（规划）','drag sets the level (planned)'],
+  ['弹簧','Springs','水位 ω13；过载拉伸 ω18 ζ0.7；复位 ω20','level ω13; stretch ω18; reset ω20'],
+  ['配色','Color','正常=蓝阶梯；≥80% 顶格=红','blue cells; top cells red past 80%'],
+  ['节拍','Beats','16 拍：升5 · 高位3 · 过载4 · 复位2 · 收2','16: up5·hold3·overload4·reset2·end2']
+ ],
+ build:function(svg){
+  var N=20,cells=[],grp=el('g',{},svg);
+  for(var i=0;i<N;i++){
+    var h=6+((i+1)/N)*46;
+    cells.push({r:el('rect',{x:(16+i*11.6).toFixed(1),y:(118-h).toFixed(1),width:9.6,height:h.toFixed(1),rx:2,class:'cI2'},grp),h:h,frac:(i+1)/N});
+  }
+  el('line',{x1:14,y1:118,x2:246,y2:118,class:'ln'},svg);
+  var thr=el('line',{x1:14,y1:118-0.8*52,x2:246,y2:118-0.8*52,class:'pD','stroke-width':1.5,'stroke-dasharray':'4 3'},svg);
+  var lab=el('text',{x:246,y:118-0.8*52-4,'text-anchor':'end',class:'txr'},svg);lab.textContent='80%';
+  var lv=new Sp(0);lv.to(0.5,0.55);lv.to(2.5,0.8);lv.to(4.5,0.9);lv.to(5.5,1.0);lv.to(7.0,0.5);
+  return function(t){
+    var level=Math.max(0,Math.min(1,lv.v(t)));
+    var stretch=1+0.12*(st(t-5.5,18,0.7)-st(t-7.0,20,0.8));
+    grp.setAttribute('transform','translate(130,118) scale(1,'+stretch.toFixed(3)+') translate(-130,-118)');
+    for(var i=0;i<N;i++){
+      var c=cells[i],on=level>=c.frac-0.001;
+      var red=level>0.8&&c.frac>0.8;
+      c.r.setAttribute('class',on?(red?'cD':'cB'):'cI2');
+      var g=on?st(t-(0.5+i*0.03)):0;
+      c.r.setAttribute('opacity',(0.25+0.75*g).toFixed(3));
+    }
+  };
+ }});
+
+/* 6 · Ticker */
+card({fam:'data',zh:'Ticker · 滚动行情条',en:'Ticker',beats:16,phase:3.5,
+ tzh:'每次换挡整条弹簧滑移并带运动模糊；盈亏色只落在涨跌签上，主体保持中性。',ten:'Each shift glides on springs with motion blur; green/red only on delta chips, the strip stays neutral.',
+ specs:[
+  ['形态','Form','横向滚动条 + 项签 + 剪裁窗','horizontal strip + chips + clip window'],
+  ['语义','Meaning','多标的最新涨跌','multi-symbol latest deltas'],
+  ['关键动作','Key action','整条滑移换挡（5 次）+ 运动模糊','strip shifts 5× with motion blur'],
+  ['光标','Cursor','按住拖动 = 直接滚读（R3）','hold & drag to scrub (R3)'],
+  ['弹簧','Springs','位移 ω13 ζ0.6（可见轻微过冲）','shift ω13 ζ0.6 (visible overshoot)'],
+  ['配色','Color','签面=纸；涨=绿 / 跌=红','paper chips; green up / red down'],
+  ['节拍','Beats','16 拍：换挡 5×2 拍 + 间隔 3×2 拍','16: 5 shifts×2 + 3 rests×2']
+ ],
+ build:function(svg){
+  var items=[['BTC','+2.1%',1],['ETH','-0.8%',0],['XAU','+0.6%',1],['US30','-0.3%',0],['EUR','+0.2%',1],['CL','+1.1%',1],['BTC','+2.3%',1],['ETH','-0.6%',0]];
+  var clip=el('clipPath',{id:'tkclip'},svg);
+  el('rect',{x:12,y:46,width:236,height:52,rx:8},clip);
+  var strip=el('g',{'clip-path':'url(#tkclip)'},svg);
+  el('rect',{x:12,y:46,width:236,height:52,rx:8,class:'stL',fill:'none'},svg);
+  var chips=[];
+  for(var i=0;i<items.length;i++){
+    var g=el('g',{},strip);
+    el('rect',{x:i*92,y:52,width:86,height:40,rx:7,class:'cP cst'},g);
+    var s1=el('text',{x:i*92+43,y:68,'text-anchor':'middle',class:'txm'},g);s1.textContent=items[i][0];
+    var s2=el('text',{x:i*92+43,y:84,'text-anchor':'middle',class:items[i][2]?'txg':'txr'},g);s2.textContent=items[i][1];
+    chips.push(g);
+  }
+  var shift=new Sp(0);shift.to(1,-92);shift.to(2.5,-184);shift.to(4,-276);shift.to(5.5,-368);shift.to(7,-460);
+  var lastX=null,lastT=null;
+  return function(t){
+    var x=shift.v(t);
+    strip.setAttribute('transform','translate('+(14+x).toFixed(1)+',0)');
+    var vel=0;
+    if(lastX!=null&&t>lastT)vel=Math.abs(x-lastX)/(t-lastT);
+    lastX=x;lastT=t;
+    blurOnly(strip,Math.min(3,vel*0.02));
+  };
+ }});
+
+/* ============================================================
+   FINANCE FAMILY ×6
+   ============================================================ */
+
+/* 7 · Quote board */
+card({fam:'fin',zh:'Quote board · 报价板',en:'Quote board',beats:16,phase:0.35,
+ tzh:'焦点单元格轮换：边框蓝脉冲 + 数值模糊切换 + 涨跌签翻色；非焦点格保持安静。',ten:'Focus cell rotates: blue border pulse + value blur-switch + delta flip; non-focus cells stay quiet.',
+ specs:[
+  ['形态','Form','2×3 报价格阵','2×3 quote grid'],
+  ['语义','Meaning','多标的价格与方向','multi-symbol price & direction'],
+  ['关键动作','Key action','焦点轮换（1.6s/格）+ 数值切换（R5）','focus rotates (1.6s/cell) + value switch'],
+  ['光标','Cursor','悬停 = 焦点跟随（覆盖轮换）','hover takes focus'],
+  ['弹簧','Springs','焦点弹跳 ω16 ζ0.68','focus pop ω16'],
+  ['配色','Color','焦点=蓝框；涨=绿 / 跌=红','focus blue; green/red deltas'],
+  ['节拍','Beats','16 拍：6 格 × (切换2拍+停留2/3拍)','16: 6 cells × (switch+rest)']
+ ],
+ build:function(svg){
+  var data=[['XAUUSD','2,374.2','2,379.8','+0.19%'],['EURUSD','1.0842','1.0838','-0.04%'],['US30','39,214','39,358','+0.37%'],['BTC','64,120','63,980','-0.22%'],['GBPUSD','1.2731','1.2744','+0.10%'],['USDJPY','152.44','152.31','-0.09%']];
+  var order=[0,4,1,5,2,3],cells=[];
+  for(var i=0;i<6;i++){
+    var g=el('g',{},svg);
+    var col=i%3,row=Math.floor(i/3);
+    var x=18+col*76,y=28+row*56;
+    el('rect',{x:x,y:y,width:70,height:50,rx:8,class:'cP cst'},g);
+    var sy=el('text',{x:x+35,y:y+16,'text-anchor':'middle',class:'tx'},g);sy.textContent=data[i][0];
+    var va=el('text',{x:x+35,y:y+34,'text-anchor':'middle',class:'txm'},g);va.textContent=data[i][1];
+    var vb=el('text',{x:x+35,y:y+34,'text-anchor':'middle',class:'txm'},g);vb.textContent=data[i][2];
+    var dl=el('text',{x:x+35,y:y+45,'text-anchor':'middle',class:'txs'},g);
+    cells.push({g:g,va:va,vb:vb,dl:dl,d:data[i],x:x,y:y});
+  }
+  return function(t){
+    var idx=Math.floor(t/1.6)%6,act=order[idx],tIn=t%1.6;
+    for(var i=0;i<6;i++){
+      var c=cells[i],actv=(i===act);
+      var s=1+(actv?0.06*st(tIn*1.2):0);
+      c.g.setAttribute('transform','translate('+(c.x+35)+','+(c.y+25)+') scale('+s.toFixed(3)+') translate('+(-(c.x+35))+','+(-(c.y+25))+')');
+      c.g.setAttribute('opacity',actv?1:0.55);
+      c.dl.textContent=actv?(tIn<0.8?c.d[3]:(c.d[3].charAt(0)==='+'?'-':'+')+c.d[3].slice(1)):c.d[3];
+      c.dl.setAttribute('class',c.dl.textContent.charAt(0)==='+'?'txg':'txr');
+      var swv=sw(tIn,0.8);
+      setSW(c.va,swv[0],tIn<0.8?1:0);setSW(c.vb,0,swv[1]);
+    }
+  };
+ }});
+
+/* 8 · P&L card */
+card({fam:'fin',zh:'P&L card · 盈亏卡',en:'P&L card',beats:16,phase:1.05,
+ tzh:'数值闭式弹簧滚动，过零即翻色翻签；底部双向条以中线为界，盈右亏左。',ten:'Value rolls on closed-form springs, flipping color at zero-crossings; a centered bar fills right (profit) or left (loss).',
+ specs:[
+  ['形态','Form','大数值 + 方向签 + 中基双向条','big value + sign chip + centered bar'],
+  ['语义','Meaning','账户盈亏与方向','account P&L & direction'],
+  ['关键动作','Key action','数值滚动 3 段 + 过零翻色（R5 切签）','3-segment roll + zero-crossing flip'],
+  ['光标','Cursor','悬停 = 拆分明细（规划）','hover for breakdown (planned)'],
+  ['弹簧','Springs','数值 ω13 ζ0.62（滚动感）','value ω13 ζ0.62'],
+  ['配色','Color','盈=绿 / 亏=红；基线=蓝','green profit / red loss; blue baseline'],
+  ['节拍','Beats','16 拍：滚3 · 盈3 · 过零3 · 回落5 · 收2','16: roll3·gain3·cross3·fall5·end2']
+ ],
+ build:function(svg){
+  el('text',{x:130,y:26,'text-anchor':'middle',class:'tx'},svg).textContent="TODAY'S P&L";
+  var chipG=el('g',{},svg);
+  el('rect',{x:104,y:34,width:52,height:16,rx:8,class:'cU'},chipG);
+  var chipT=el('text',{x:130,y:45.5,'text-anchor':'middle',class:'txw'},chipG);chipT.textContent='LONG';
+  var val=el('text',{x:130,y:82,'text-anchor':'middle','font-size':22,'font-weight':700},svg);
+  var bar=el('rect',{y:96,height:10,rx:3},svg);
+  el('line',{x1:130,y1:92,x2:130,y2:110,class:'pB','stroke-width':2},svg);
+  var sp=new Sp(-800);sp.to(1.5,1200);sp.to(4,2600);sp.to(6,-400);
+  return function(t){
+    var v=sp.v(t),pos=v>=0;
+    val.textContent=(pos?'+':'-')+'¥'+Math.abs(Math.round(v)).toLocaleString();
+    val.setAttribute('class',pos?'txg':'txr');
+    val.setAttribute('font-size',22);
+    var w=Math.min(1,Math.abs(v)/2600)*100;
+    bar.setAttribute('x',pos?130:130-w);bar.setAttribute('width',w.toFixed(1));
+    bar.setAttribute('class',pos?'cU':'cD');
+    var swc=sw(t,5.35,0.2,0.25);
+    setSW(chipG,swc[0],v>=0?1:0);
+  };
+ }});
+
+/* 9 · Depth bar */
+card({fam:'fin',zh:'Depth bar · 深度条',en:'Depth bar',beats:16,phase:1.75,
+ tzh:'买卖两侧阶梯随盘口更新各自弹跳；中价签每次更新模糊切换，失衡时重侧增亮。',ten:'Bid/ask ladders spring on each book update; the mid-price pill blur-switches; the heavier side brightens on imbalance.',
+ specs:[
+  ['形态','Form','中基左右阶梯 + 中价签','centered ladders + mid pill'],
+  ['语义','Meaning','盘口深度与买卖失衡','book depth & imbalance'],
+  ['关键动作','Key action','两侧宽度弹跳（5 次更新）+ 中价切换','width springs 5× + mid switch'],
+  ['光标','Cursor','悬停档位 = 档位数值','hover a level for its size'],
+  ['弹簧','Springs','档宽 ω14 ζ0.65','level width ω14'],
+  ['配色','Color','买=绿（左）/ 卖=红（右）；中价=蓝','bids green left / asks red right; mid blue'],
+  ['节拍','Beats','16 拍：更新 5×2 拍 + 呼吸 6 拍','16: 5 updates×2 + 6 breathing']
+ ],
+ build:function(svg){
+  var midPill=el('g',{},svg);
+  el('rect',{x:92,y:16,width:76,height:20,rx:10,class:'cB'},midPill);
+  var mt=el('text',{x:130,y:29.5,'text-anchor':'middle',class:'txw'},midPill);mt.textContent='2,374.20';
+  var lv=[];
+  function mk(y,side){
+    var r=el('rect',{x:0,y:y,height:16,rx:3},svg);
+    var s=new Sp(20);
+    lv.push({r:r,s:s,side:side,y:y});
+  }
+  mk(52,'bid');mk(72,'bid');mk(52,'ask');mk(72,'ask');
+  var upd=[1,2.5,4,5.5,7];
+  var wb=[[52,30],[48,36],[60,26],[44,38],[56,32]],wa=[[44,26],[56,40],[38,22],[60,44],[48,30]];
+  for(var u=0;u<upd.length;u++){
+    lv[0].s.to(upd[u],wb[u][0]);lv[1].s.to(upd[u],wb[u][1]);
+    lv[2].s.to(upd[u],wa[u][0]);lv[3].s.to(upd[u],wa[u][1]);
+  }
+  var bl=el('text',{x:20,y:110,class:'txs'},svg);bl.textContent='BID';
+  var al=el('text',{x:240,y:110,'text-anchor':'end',class:'txs'},svg);al.textContent='ASK';
+  return function(t){
+    for(var i=0;i<4;i++){
+      var l=lv[i],w=l.s.v(t);
+      if(l.side==='bid'){l.r.setAttribute('x',(128-w).toFixed(1));l.r.setAttribute('width',Math.max(2,w).toFixed(1));l.r.setAttribute('class','cU');}
+      else{l.r.setAttribute('x',132);l.r.setAttribute('width',Math.max(2,w).toFixed(1));l.r.setAttribute('class','cD');}
+    }
+    var bidT=lv[0].s.v(t)+lv[1].s.v(t),askT=lv[2].s.v(t)+lv[3].s.v(t);
+    var imb=bidT/(bidT+askT);
+    for(var j=0;j<4;j++){
+      var heavy=(lv[j].side==='bid')=== (imb>0.5);
+      lv[j].r.setAttribute('opacity',heavy?1:0.55);
+    }
+    var cyc=Math.floor(t/1.5),ph=t%1.5,swv=sw(ph,0.9);
+    mt.textContent=cyc%2?'2,374.65':'2,374.20';
+    midPill.setAttribute('opacity',1);
+  };
+ }});
+
+/* 10 · Position card */
+card({fam:'fin',zh:'Position card · 持仓卡',en:'Position card',beats:16,phase:2.45,
+ tzh:'完整微叙事：持仓浮动盈亏滚动 → 平仓按钮变形为确认 → 打勾 → 旧仓模糊退出、新仓进入（R5）。',ten:'A micro-narrative: floating P&L rolls → close button morphs to confirm → checkmark → old position blurs out, new one in (R5).',
+ specs:[
+  ['形态','Form','持仓卡：标的 / 方向 / 数量 / 浮盈 / 平仓钮','card: symbol / side / size / uPnL / close'],
+  ['语义','Meaning','持仓状态与平仓流程','position state & close flow'],
+  ['关键动作','Key action','盈亏滚 → 按钮三态变形（平仓→确认→✓）→ 换仓','P&L roll → 3-state button → swap'],
+  ['光标','Cursor','按下平仓钮 = 触发叙事','press close to run the narrative'],
+  ['弹簧','Springs','盈亏 ω13；按钮宽度 ω16','uPnL ω13; button width ω16'],
+  ['配色','Color','LONG=绿 / SHORT=红；确认态=红；成交=绿','LONG green / SHORT red; confirm red; filled green'],
+  ['节拍','Beats','16 拍：滚动6 · 平仓4 · 换仓4 · 收2','16: roll6·close4·swap4·end2']
+ ],
+ build:function(svg){
+  el('rect',{x:14,y:22,width:232,height:108,rx:10,class:'cP cst'},svg);
+  var g1=el('g',{},svg),g2=el('g',{},svg);
+  var s1=el('text',{x:30,y:46,class:'txb'},g1);s1.textContent='XAU/USD';
+  el('rect',{x:30,y:54,width:44,height:15,rx:7.5,class:'cU'},g1);
+  var s2=el('text',{x:52,y:64.5,'text-anchor':'middle',class:'txw'},g1);s2.textContent='LONG';
+  var s3=el('text',{x:30,y:86,class:'tx'},g1);s3.textContent='0.5 lots @ 2,374.2';
+  var p1=el('text',{x:30,y:112,class:'txm'},g1);
+  var s1b=el('text',{x:30,y:46,class:'txb'},g2);s1b.textContent='US30';
+  el('rect',{x:30,y:54,width:52,height:15,rx:7.5,class:'cD'},g2);
+  var s2b=el('text',{x:56,y:64.5,'text-anchor':'middle',class:'txw'},g2);s2b.textContent='SHORT';
+  var s3b=el('text',{x:30,y:86,class:'tx'},g2);s3b.textContent='1.0 lots @ 39,214';
+  var p2=el('text',{x:30,y:112,class:'txr'},g2);p2.textContent='-¥52';
+  var btnW=new Sp(56);btnW.to(3.5,64);btnW.to(4.6,72);
+  var btn=el('rect',{y:96,height:24,rx:8},svg);
+  var bt=el('text',{y:112,'text-anchor':'middle',class:'txw'},svg);
+  var pnl=new Sp(0);pnl.to(0.5,86);pnl.to(3,214);pnl.to(5.2,-52);
+  return function(t){
+    var v=pnl.v(t),pos=v>=0;
+    p1.textContent=(pos?'+':'-')+'¥'+Math.abs(Math.round(v));
+    p1.setAttribute('class',pos?'txg':'txr');
+    var w=btnW.v(t),bx=230-w;
+    btn.setAttribute('x',bx);btn.setAttribute('width',w.toFixed(1));
+    bt.setAttribute('x',bx+w/2);
+    if(t<3.5){btn.setAttribute('class','cB');bt.textContent='CLOSE';}
+    else if(t<4.6){btn.setAttribute('class','cD');bt.textContent='CONFIRM?';}
+    else{btn.setAttribute('class','cU');bt.textContent='FILLED ✓';}
+    var swp=sw(t,5.4,0.25,0.3);
+    setSW(g1,swp[0],t<5.4?1:0);setSW(g2,0,swp[1]);
+  };
+ }});
+
+/* 11 · Order toast */
+card({fam:'fin',zh:'Order toast · 订单通知',en:'Order toast',beats:16,phase:3.15,
+ tzh:'滑入带过冲 → 存活进度条排空 → 变形「已成交」打勾 → 滑出模糊退出；双 toast 交错循环。',ten:'Slides in with overshoot → lifetime bar drains → morphs to filled with a drawn checkmark → slides out blurred; two toasts alternate.',
+ specs:[
+  ['形态','Form','通知条 + 存活进度条 + 打勾','toast + lifetime bar + checkmark'],
+  ['语义','Meaning','挂单存活与成交回报','order lifetime & fill report'],
+  ['关键动作','Key action','滑入过冲 → 进度排空 → 勾笔画自绘 → 退出','in → drain → check draw → out'],
+  ['光标','Cursor','悬停 = 冻结存活（规划）','hover freezes lifetime (planned)'],
+  ['弹簧','Springs','滑入 ω14 ζ0.6；退出 ω20 ζ0.8','in ω14; out ω20'],
+  ['配色','Color','挂单=蓝；成交=绿','pending blue; filled green'],
+  ['节拍','Beats','16 拍：4s 周期 ×2 交错','16: 4s cycle ×2 staggered']
+ ],
+ build:function(svg){
+  function mk(){
+    var g=el('g',{},svg);
+    var card=el('g',{},g);
+    el('rect',{x:30,y:52,width:200,height:48,rx:10,class:'cP cst'},card);
+    var t1=el('text',{x:46,y:72,class:'txm'},card);t1.textContent='LIMIT · XAU 0.5 @ 2,374';
+    var t2=el('text',{x:46,y:72,class:'txm'},card);t2.textContent='FILLED ✓ 2,374.2';
+    var barBg=el('rect',{x:46,y:86,width:168,height:5,rx:2.5,class:'cI2',opacity:0.3},card);
+    var bar=el('rect',{x:46,y:86,width:168,height:5,rx:2.5,class:'cB'},card);
+    var chk=el('path',{d:'M190 62 l5 5 l9 -10',class:'stU','stroke-width':2.5,fill:'none'},card);
+    return {g:g,card:card,t1:t1,t2:t2,bar:bar,chk:chk};
+  }
+  var A=mk(),B=mk();
+  function draw(o,tt){
+    if(tt<0||tt>=4){o.g.setAttribute('opacity',0);return;}
+    o.g.setAttribute('opacity',1);
+    var x;
+    if(tt<0.45){x=240-(240-0)*st(tt,14,0.6);}
+    else if(tt<3.2){x=0;}
+    else{x=0-220*st(tt-3.2,20,0.8);}
+    o.card.setAttribute('transform','translate('+x.toFixed(1)+',0)');
+    blurOnly(o.card,tt>3.2?Math.min(4,(tt-3.2)*6):0);
+    var prog=(tt<0.5)?1:(tt<2.7?1-(tt-0.5)/2.2:0);
+    o.bar.setAttribute('width',(168*prog).toFixed(1));
+    var filled=tt>=2.7;
+    var swv=sw(tt,2.7,0.2,0.25);
+    setSW(o.t1,swv[0],filled?0:1);setSW(o.t2,0,swv[1]);
+    var cd=filled?Math.max(0,Math.min(1,(tt-2.75)/0.4)):0;
+    o.chk.setAttribute('stroke-dasharray','24');
+    o.chk.setAttribute('stroke-dashoffset',(24*(1-cd)).toFixed(1));
+    o.chk.setAttribute('opacity',cd>0?1:0);
+  }
+  return function(t){
+    draw(A,((t%8)%4));
+    draw(B,((t+2)%8)%4);
+  };
+ }});
+
+/* 12 · Drawdown meter — NEW PROPOSAL */
+card({fam:'fin',zh:'Drawdown meter · 回撤水位（新提案）',en:'Drawdown meter (new)',beats:16,phase:3.85,sig:true,
+ tzh:'第 6 个金融组件提案：考核盘日的回撤水位逼近限额时，整管拉伸、水位置转红；RESET 强弹簧归位。PropFirm 考核的核心仪表。',ten:'6th finance proposal: as daily drawdown nears the limit, the tube stretches and the water turns red; RESET snaps back hard. The core prop-firm gauge.',
+ specs:[
+  ['形态','Form','竖管水位 + 限额虚线 + RESET 签','vertical tube + limit line + RESET chip'],
+  ['语义','Meaning','日回撤 vs 账号限额','daily drawdown vs account limit'],
+  ['关键动作','Key action','水位爬升 → 触限拉伸转红 → RESET 强弹归位','rise → overload stretch → hard reset'],
+  ['光标','Cursor','拖动水位 = 直接模拟回撤','drag the level to simulate'],
+  ['弹簧','Springs','爬升 ω13；拉伸 ω18 ζ0.7；RESET ω20 ζ0.8','rise ω13; stretch ω18; reset ω20'],
+  ['配色','Color','正常=蓝；≥80% 限额=红','blue normal; red past 80% limit'],
+  ['节拍','Beats','16 拍：爬5 · 高位3 · 触限4 · 复位2 · 收2','16: rise5·hold3·overload4·reset2·end2']
+ ],
+ build:function(svg){
+  var grp=el('g',{},svg);
+  el('rect',{x:100,y:18,width:60,height:104,rx:8,class:'stL',fill:'none','stroke-width':1.5},grp);
+  var fill=el('rect',{x:103,y:20,width:54,rx:6},grp);
+  var lim=el('line',{x1:96,y1:38.8,x2:164,y2:38.8,class:'pD','stroke-width':1.5,'stroke-dasharray':'4 3'},svg);
+  var limT=el('text',{x:170,y:42,class:'txr'},svg);limT.textContent='80%';
+  var valT=el('text',{x:88,y:30,'text-anchor':'end',class:'txm'},svg);
+  var valL=el('text',{x:88,y:44,'text-anchor':'end',class:'txs'},svg);valL.textContent='DD';
+  var rst=el('g',{},svg);
+  el('rect',{x:96,y:128,width:68,height:16,rx:8,class:'cD'},rst);
+  var rt=el('text',{x:130,y:139,'text-anchor':'middle',class:'txw'},rst);rt.textContent='RESET';
+  var lv=new Sp(0);lv.to(0.5,0.55);lv.to(2.5,0.78);lv.to(4.5,0.92);lv.to(6.0,0.08,20,0.8);
+  return function(t){
+    var level=Math.max(0,Math.min(1,lv.v(t)));
+    var stretch=1+0.12*(st(t-4.5,18,0.7)-st(t-6.0,20,0.8));
+    grp.setAttribute('transform','translate(130,122) scale(1,'+stretch.toFixed(3)+') translate(-130,-122)');
+    var h=104*level;
+    fill.setAttribute('y',(20+104-h).toFixed(1));
+    fill.setAttribute('height',Math.max(2,h).toFixed(1));
+    fill.setAttribute('class',level>0.8?'cD':'cB');
+    valT.textContent=Math.round(level*100)+'%';
+    valT.setAttribute('class',level>0.8?'txr':'txm');
+    var rpop=st(t-6.0,16,0.7);
+    rst.setAttribute('opacity',rpop>0.02?(0.4+0.6*rpop).toFixed(3):0);
+    rst.setAttribute('transform','translate(130,136) scale('+(0.7+0.3*rpop).toFixed(3)+') translate(-130,-136)');
+  };
+ }});
+
+/* ---------- transport ---------- */
+var clock=0,playing=true,speed=1,MASTER=8;
+var playBtn=document.getElementById('playBtn'),scrub=document.getElementById('scrub'),
+    clockLab=document.getElementById('clockLab'),beat=document.getElementById('beat'),
+    speedSel=document.getElementById('speedSel');
+playBtn.addEventListener('click',function(){playing=!playing;playBtn.textContent=playing?'⏸ pause':'▶ play';});
+speedSel.addEventListener('change',function(){speed=parseFloat(speedSel.value);});
+var scrubbing=false;
+scrub.addEventListener('pointerdown',function(){scrubbing=true;});
+window.addEventListener('pointerup',function(){scrubbing=false;});
+scrub.addEventListener('input',function(){clock=parseFloat(scrub.value)%MASTER;});
+
+var last=performance.now();
+function frame(now){
+  var dt=Math.min(0.1,(now-last)/1000);last=now;
+  if(playing&&!scrubbing)clock=(clock+dt*speed)%MASTER;
+  scrub.value=clock.toFixed(2);
+  clockLab.textContent=clock.toFixed(1)+'s';
+  var bp=1-((clock%0.5)/0.5);
+  beat.style.opacity=(0.25+0.75*bp).toFixed(2);
+  beat.style.transform='scale('+(0.8+0.25*bp).toFixed(2)+')';
+  for(var i=0;i<CARDS.length;i++){
+    try{CARDS[i].render((clock+CARDS[i].phase)%MASTER);}catch(e){}
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

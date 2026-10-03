@@ -1,0 +1,74 @@
+{
+  "slug": "sarah-motion",
+  "name": "Sarah · 动效组件库",
+  "type": "library",
+  "repo": "https://github.com/78tyih/sarah-motion",
+  "language": "HTML + JS + Python",
+  "status": "available",
+  "last_verified": "2026-10-03",
+  "one_liner": {
+    "zh": "每个组件都是时间的纯函数：一套有语法的动效库，可跳转、可逐帧、循环闭合零像素差，含金融 UI 组件族。",
+    "en": "Every component is a pure function of time — a motion library with real grammar: seekable, frame-exact, loop-closing to zero pixel diff, with a finance UI family."
+  },
+  "problem": {
+    "zh": "动效 demo 满地都是，但它们是「演给人看的」，不是「可依赖的」：无法任意跳转、无法逐帧控制、循环点会抖。同时，金融/交易界面的展示组件（报价、杠杆、回放）在通用组件库里长期缺位。",
+    "en": "Motion demos are everywhere, but they perform rather than compute: no seeking, no frame accuracy, visible loop seams. Finance UI components (quotes, leverage, replay) are missing from generic libraries."
+  },
+  "scenarios": [
+    {
+      "zh": "产品宣传视频需要无缝循环的组件动画",
+      "en": "Product promo videos need seamless component loops",
+      "outcome_zh": "20s 闭环，t=0 与 t=20 逐像素比对 max diff = 0（render.py loop 可复验）",
+      "outcome_en": "20s closed loop; t=0 vs t=20 pixel comparison max diff = 0 (re-runnable via render.py loop)"
+    },
+    {
+      "zh": "金融界面需要守配色纪律的动效组件",
+      "en": "Finance UI needs motion components with color discipline",
+      "outcome_zh": "蓝=中性/操作、绿=涨、红=跌/风险，11 个 Quote Morph 组件已交付",
+      "outcome_en": "Blue=neutral/action, green=up, red=down/risk; 11 Quote Morph components delivered"
+    },
+    {
+      "zh": "动画需要任意时刻可求值（演示、拖拽回放、Lottie 替代）",
+      "en": "Animation must be evaluable at any instant (demos, scrubbing, Lottie alternative)",
+      "outcome_zh": "seek(t) 是纯函数，无 CSS transition、无定时器、无帧间状态",
+      "outcome_en": "seek(t) is a pure function: no CSS transitions, no timers, no inter-frame state"
+    }
+  ],
+  "architecture": {
+    "summary_zh": "spec 驱动引擎：加一个组件族 = 加一份 spec，不动核心。构建时把引擎与字体内联成单文件 HTML；渲染时 Playwright 逐子帧截图直灌 ffmpeg tmix 动态模糊。",
+    "summary_en": "Spec-driven engine: a new component family is a new spec, not a core change. Build inlines engine+fonts into single-file HTML; render pipes Playwright sub-frames straight into ffmpeg tmix motion blur.",
+    "modules": [
+      {"path": "src/engine.js", "role_zh": "引擎：弹簧闭式解 / 时间轴 / 状态渲染器", "role_en": "Engine: closed-form springs / timeline / state renderers"},
+      {"path": "src/*.template.html", "role_zh": "4 个模板：循环动画 / 组件总览 / 单组件渲染 / 视频总览", "role_en": "4 templates: loop, library, per-component, video index"},
+      {"path": "build.mjs", "role_zh": "字体与引擎内联 → dist/*.html 单文件零外链", "role_en": "Inline engine+fonts → single-file dist/*.html"},
+      {"path": "render.py", "role_zh": "Playwright 逐帧渲染 + ffmpeg tmix，rgb24 直灌不落盘", "role_en": "Playwright frame rendering + ffmpeg tmix, rawvideo piped"}
+    ]
+  },
+  "reuse": [
+    {"item": "六条动效语法（时间纯函数/闭式弹簧/直接操作/双弹簧边缘/内容切换时机/循环闭合）", "where": "README「语法」节", "condition": "无依赖，纯方法论"},
+    {"item": "弹簧闭式阶跃响应公式 x(t) = x₀ + Σ Δᵢ·step(t−tᵢ)", "where": "src/engine.js", "condition": "JS 项目直接抄"},
+    {"item": "渲染管线（Playwright→PIL→ffmpeg tmix 动态模糊）", "where": "render.py", "condition": "Python + Playwright + ffmpeg"},
+    {"item": "Quote Morph 金融组件 spec 族", "where": "src/engine.js (engines.quote)", "condition": "沿用配色纪律可改色"},
+    {"item": "设计 token（画布/墨纸/强调色/弹簧参数/120BPM 节拍）", "where": "README「设计 Token」节", "condition": "无依赖"}
+  ],
+  "evidence": {
+    "verified": [
+      "media/ 下 22 个 mp4 实际存在（GitHub API 实查 2026-10-03：basic 11 + quote 11）",
+      "仓库文件结构与 README 声明的目录结构一致（GitHub API 实查）"
+    ],
+    "self_reported": [
+      "循环闭合 max diff = 0：README 自述，附 render.py loop 复验命令，未独立复核",
+      "60fps / 120 BPM / 20.0s：设计参数，README 自述",
+      "渲染管线耗时约 4 分钟：README 自述"
+    ],
+    "unverified": [
+      "GitHub README 内嵌 <video> 相对路径 mp4 的实际播放行为（试点实测项）"
+    ]
+  },
+  "links": {
+    "showcase": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/docs/showcase.html",
+    "spec_atlas": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/docs/spec-atlas.html",
+    "video_index": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/index.html",
+    "note": "interim via jsDelivr; will switch to https://78tyih.github.io/projects/sarah-motion/ when the Pages hub ships"
+  }
+}
