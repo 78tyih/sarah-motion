@@ -153,13 +153,14 @@
 <div class="hero">
   <div class="kicker">spec sheet v0.1 · live prototypes · pure function of time</div>
   <h1><span class="zh">组件规格图谱：数据类 ×6 + 金融类 ×6</span><span class="en">Component Spec Atlas: Data ×6 + Finance ×6</span></h1>
-  <p class="sub zh">路线图上「规划中」的 12 个组件，在这里变成可执行的规格 + 可拖动验证的实时原型。原型不是 CSS 动画——是库自己的语法：闭式弹簧、seek(t) 纯时间函数，拖进度条到任意时刻即为 R1 的直接演示。配色纪律全程执行：蓝=中性/操作，绿=涨，红=跌/风险。</p>
-  <p class="sub en">The 12 roadmap components become executable specs plus live prototypes. No CSS transitions — prototypes run the library's own grammar: closed-form springs, seek(t) pure functions. Scrub anywhere to see Rule R1. Color discipline throughout: blue=neutral/action, green=up, red=down/risk.</p>
+  <p class="sub zh">路线图上「规划中」的 12 个组件，在这里变成可执行的规格 + 可拖动验证的实时原型。原型不是 CSS 动画——是库自己的语法：闭式弹簧、seek(t) 纯时间函数，拖进度条到任意时刻即为 R1 的直接演示。配色纪律全程执行：蓝=中性/操作，绿=涨，红=跌/风险。R1–R5 在原型内生效；R6 循环闭合是引擎阶段的验收项（render.py loop 卡零），原型不做逐像素闭合。</p>
+  <p class="sub en">The 12 roadmap components become executable specs plus live prototypes. No CSS transitions — prototypes run the library's own grammar: closed-form springs, seek(t) pure functions. Scrub anywhere to see Rule R1. Color discipline throughout: blue=neutral/action, green=up, red=down/risk. R1–R5 are live in the prototypes; R6 loop closure is an engine-stage acceptance item, not claimed here.</p>
   <div class="metaline">
     <span class="chip"><b>6</b> data components</span>
     <span class="chip"><b>6</b> finance components</span>
     <span class="chip"><span class="zh">每原型 <b>8s / 16 拍</b> @120BPM</span><span class="en">each proto <b>8s / 16 beats</b> @120BPM</span></span>
     <span class="chip">springs <b>ω13–17 ζ0.6–0.72</b></span>
+    <span class="chip" style="background:var(--panel2);color:var(--ink2)">R6 closure → <b>engine stage</b></span>
     <span class="chip new"><span class="zh"><b>新提案</b>：第 6 个金融组件「回撤水位」</span><span class="en"><b>new proposal</b>: 6th finance component "Drawdown meter"</span></span>
   </div>
 </div>
@@ -470,8 +471,10 @@ card({fam:'data',zh:'Gauge · 仪表盘',en:'Gauge',beats:16,phase:2.1,
   var vt=el('text',{x:130,y:132,'text-anchor':'middle',class:'txb'},svg);
   var hint=el('text',{x:130,y:22,'text-anchor':'middle',class:'txs'},svg);
   hint.textContent='drag ↕';
-  var nd=new Sp(0);nd.to(0.5,55);nd.to(3,82);nd.to(5,30);
-  var drag=null;
+  var EV=[[0.5,55],[3,82],[5,30]];
+  var base=new Sp(0);EV.forEach(function(e){base.to(e[0],e[1]);});
+  var nd=base;
+  var drag=null,dragV=null,lastT=0;
   svg.style.cursor='grab';
   function ptr(ev){
     var r=svg.getBoundingClientRect();
@@ -481,9 +484,20 @@ card({fam:'data',zh:'Gauge · 仪表盘',en:'Gauge',beats:16,phase:2.1,
   }
   svg.addEventListener('pointerdown',function(ev){drag=ptr(ev);svg.setPointerCapture&&svg.setPointerCapture(ev.pointerId);ev.preventDefault();});
   svg.addEventListener('pointermove',function(ev){if(drag!=null)drag=ptr(ev);});
-  window.addEventListener('pointerup',function(){drag=null;});
+  window.addEventListener('pointerup',function(){
+    if(drag!=null&&dragV!=null){
+      /* R3: release springs from the ACTUAL dragged position back onto the intended trajectory */
+      var intended=base.v(lastT);
+      nd=new Sp(dragV);
+      nd.to(lastT,intended);
+      EV.forEach(function(e){if(e[0]>lastT)nd.to(e[0],e[1]);});
+    }
+    drag=null;dragV=null;
+  });
   return function(t){
-    var v=drag!=null?((drag+120)/2.4):nd.v(t);
+    lastT=t;
+    if(drag!=null)dragV=(drag+120)/2.4;
+    var v=drag!=null?dragV:nd.v(t);
     v=Math.max(0,Math.min(100,v));
     var a=ang(v);
     valArc.setAttribute('d',arcP(R,-120,Math.max(a,-119.5)));
@@ -797,6 +811,7 @@ card({fam:'fin',zh:'Drawdown meter · 回撤水位（新提案）',en:'Drawdown 
  tzh:'第 6 个金融组件提案：考核盘日的回撤水位逼近限额时，整管拉伸、水位置转红；RESET 强弹簧归位。PropFirm 考核的核心仪表。',ten:'6th finance proposal: as daily drawdown nears the limit, the tube stretches and the water turns red; RESET snaps back hard. The core prop-firm gauge.',
  specs:[
   ['形态','Form','竖管水位 + 限额虚线 + RESET 签','vertical tube + limit line + RESET chip'],
+  ['口径','Basis','日回撤，基准=当日初始资金（PropFirm 日限额口径）；equity 高水位口径为可选参数','daily DD vs day-start balance (prop-firm daily limit); HWM basis optional'],
   ['语义','Meaning','日回撤 vs 账号限额','daily drawdown vs account limit'],
   ['关键动作','Key action','水位爬升 → 触限拉伸转红 → RESET 强弹归位','rise → overload stretch → hard reset'],
   ['光标','Cursor','拖动水位 = 直接模拟回撤','drag the level to simulate'],
