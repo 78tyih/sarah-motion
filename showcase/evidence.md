@@ -13,6 +13,8 @@
 | GitHub Pages（main /docs）以 `text/html` 提供 showcase.html 与 spec-atlas.html（HTTP 200） | curl 实测 | 2026-10-03 |
 | GitHub README 渲染 Mermaid 代码块（页面含 data-type="mermaid"） | curl 抓取仓库首页实查 | 2026-10-03 |
 | jsDelivr 对 .html 返回 `text/plain`（nosniff）→ 不能当 HTML 展示页宿主 | curl 实测 | 2026-10-03 |
+| **GitHub README 中 `<video>` 标签被净化器剥离**（相对路径与绝对 URL 均被剥，渲染为空段落；探针分支 embed-test 实测） | curl 抓取渲染后页面 | 2026-10-03 |
+| **GIF 与 `<picture>` 在 README 正常内嵌并自动播放**（`data-animated-image`，相对路径 raw 引用） | curl 实测 | 2026-10-03 |
 
 ## 自述未独立复核（Inferred · Self-reported）
 
@@ -24,9 +26,7 @@
 
 ## 未验证（Unknown）
 
-| 项 | 计划 |
-|---|---|
-| GitHub README 内嵌 `<video>` 仓库文件的播放行为 | 当前 README 未内嵌视频（视频走展示页），该项暂不需要；若未来要内嵌再实测 |
+无。README 嵌视频问题已实测关闭：`<video>` 不可用，GIF + `<picture>` 是 README 内嵌动图的上限。
 
 ## 授权边界
 
