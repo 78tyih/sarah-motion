@@ -4,6 +4,17 @@
 
 **[交互展示页](https://78tyih.github.io/sarah-motion/showcase.html)**（ZH/EN × 日/夜，22 组件视频可直接播放）· **[组件规格图谱](https://78tyih.github.io/sarah-motion/spec-atlas.html)**（数据×6 + 金融×6 实时原型）· [架构说明](#3-项目结构--architecture) · [复用指南](#4-能复用什么--value--reuse)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/cover-dark.png">
+  <img src="docs/assets/cover-light.png" alt="Sarah 组件库封面：液体标签的弹簧拉伸变形" width="720">
+</picture>
+
+**动起来长这样**（GIF 速览；完整 22 段无缝循环视频见[交互展示页](https://78tyih.github.io/sarah-motion/showcase.html)）：
+
+| 液体标签 · 双弹簧拉伸（R4） | 杠杆滑块 · 过载签名 |
+|---|---|
+| ![液体标签循环](docs/assets/tabs-loop.gif) | ![杠杆过载循环](docs/assets/leverage-loop.gif) |
+
 | 类型 | 状态 | 入口 |
 |---|---|---|
 | 动效组件库（JS 引擎 + Python 渲染管线） | 可用 · 基础 11 + 金融 11 已交付；数据 6 + 金融 6 已出规格（[图谱](https://78tyih.github.io/sarah-motion/spec-atlas.html)） | 下方 `本地运行` / [交互展示页](https://78tyih.github.io/sarah-motion/showcase.html) |
