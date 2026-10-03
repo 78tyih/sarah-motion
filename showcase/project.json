@@ -66,9 +66,9 @@
     ]
   },
   "links": {
-    "showcase": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/docs/showcase.html",
-    "spec_atlas": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/docs/spec-atlas.html",
-    "video_index": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/index.html",
-    "note": "interim via jsDelivr; will switch to https://78tyih.github.io/projects/sarah-motion/ when the Pages hub ships"
+    "showcase": "https://78tyih.github.io/sarah-motion/showcase.html",
+    "spec_atlas": "https://78tyih.github.io/sarah-motion/spec-atlas.html",
+    "videos": "https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/media/",
+    "note": "Pages served from main /docs; videos via jsDelivr"
   }
 }

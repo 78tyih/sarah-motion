@@ -2,11 +2,11 @@
 
 > 给做产品宣传视频和金融界面的人：每个组件都是**时间的纯函数**——可任意跳转、可逐帧控制、20 秒循环闭合到**零像素差**。不是动效 demo 集，是一套有语法的库。
 
-**[交互展示页](https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/docs/showcase.html)**（ZH/EN × 日/夜）· **[组件规格图谱](https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/docs/spec-atlas.html)**（数据×6 + 金融×6 实时原型）· [视频总览](https://cdn.jsdelivr.net/gh/78tyih/sarah-motion@main/index.html) · [架构说明](#3-项目结构--architecture) · [复用指南](#4-能复用什么--value--reuse)
+**[交互展示页](https://78tyih.github.io/sarah-motion/showcase.html)**（ZH/EN × 日/夜，22 组件视频可直接播放）· **[组件规格图谱](https://78tyih.github.io/sarah-motion/spec-atlas.html)**（数据×6 + 金融×6 实时原型）· [架构说明](#3-项目结构--architecture) · [复用指南](#4-能复用什么--value--reuse)
 
 | 类型 | 状态 | 入口 |
 |---|---|---|
-| 动效组件库（JS 引擎 + Python 渲染管线） | 可用 · 基础 11 + 金融 11 已交付；数据 6 + 金融 6 已出规格（[图谱](docs/spec-atlas.html)） | 下方 `本地运行` / [交互展示页](docs/showcase.html) |
+| 动效组件库（JS 引擎 + Python 渲染管线） | 可用 · 基础 11 + 金融 11 已交付；数据 6 + 金融 6 已出规格（[图谱](https://78tyih.github.io/sarah-motion/spec-atlas.html)） | 下方 `本地运行` / [交互展示页](https://78tyih.github.io/sarah-motion/showcase.html) |
 
 ---
 
@@ -97,10 +97,10 @@ flowchart LR
 - [x] 10 状态语法 + 引擎 + 总览页 + 20s showreel
 - [x] 每组件独立 MP4 + 视频总览页
 - [x] Quote Morph 金融组件（11 状态）+ spec 驱动重构 + 闭合零像素差
-- [ ] 数据类 6 组件（Sparkline / Candle / Donut / Gauge / Heatbar / Ticker）— **规格已定稿，含实时原型：[组件规格图谱](docs/spec-atlas.html)**
+- [ ] 数据类 6 组件（Sparkline / Candle / Donut / Gauge / Heatbar / Ticker）— **规格已定稿，含实时原型：[组件规格图谱](https://78tyih.github.io/sarah-motion/spec-atlas.html)**
 - [ ] 金融类 6 组件（Quote board / P&L card / Depth bar / Position card / Order toast / **Drawdown meter·新提案**）— 同上
 - [ ] 设计 token 页 / 可复制参数面板
 
 ---
 
-相关入口：[交互展示页（ZH/EN × 日/夜）](docs/showcase.html) · [组件规格图谱](docs/spec-atlas.html) · [全部组件视频](index.html) · [问题反馈](https://github.com/78tyih/sarah-motion/issues)
+相关入口：[交互展示页（ZH/EN × 日/夜）](https://78tyih.github.io/sarah-motion/showcase.html) · [组件规格图谱](https://78tyih.github.io/sarah-motion/spec-atlas.html) · [问题反馈](https://github.com/78tyih/sarah-motion/issues)
