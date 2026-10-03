@@ -9,6 +9,10 @@
 | media/ 下 22 个 mp4 存在（basic 11 + quote 11，最大 468KB） | GitHub API 文件列表实查 | 2026-10-03 |
 | 仓库结构 = engine.js + 4 模板 + build.mjs + render.py + fonts/ + dist/ | GitHub API 实查 | 2026-10-03 |
 | README 含六条语法、token 表、22 组件清单、渲染命令 | GitHub API 实读 | 2026-10-03 |
+| jsDelivr 以 `video/mp4` 分发 media/*.mp4（HTTP 200） | curl 实测 | 2026-10-03 |
+| GitHub Pages（main /docs）以 `text/html` 提供 showcase.html 与 spec-atlas.html（HTTP 200） | curl 实测 | 2026-10-03 |
+| GitHub README 渲染 Mermaid 代码块（页面含 data-type="mermaid"） | curl 抓取仓库首页实查 | 2026-10-03 |
+| jsDelivr 对 .html 返回 `text/plain`（nosniff）→ 不能当 HTML 展示页宿主 | curl 实测 | 2026-10-03 |
 
 ## 自述未独立复核（Inferred · Self-reported）
 
@@ -22,8 +26,7 @@
 
 | 项 | 计划 |
 |---|---|
-| GitHub README 内嵌 `<video src="media/*.mp4">` 是否直接播放 | 推送后开仓库首页实测；不可播则封面图引流到 showcase 页 |
-| jsDelivr CDN 对该仓库 media/ 的视频分发 | showcase.html 第一版直接依赖，交付前打开验收 |
+| GitHub README 内嵌 `<video>` 仓库文件的播放行为 | 当前 README 未内嵌视频（视频走展示页），该项暂不需要；若未来要内嵌再实测 |
 
 ## 授权边界
 
